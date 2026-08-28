@@ -1415,33 +1415,45 @@ git push origin main
 ```ts
 import { describe, expect, it } from 'vitest'
 import { toCardItem } from '@/lib/media'
+import type { TrendingItem } from '@/lib/tmdb/types'
 
 describe('toCardItem', () => {
-  it('reads title from a movie payload', () => {
-    const card = toCardItem({ id: 1, title: 'Inception', poster_path: '/a.jpg' } as never, 'movie')
+  it('reads title from a movie item', () => {
+    const card = toCardItem({
+      id: 1,
+      title: 'Inception',
+      poster_path: '/a.jpg',
+      media_type: 'movie',
+    } as TrendingItem)
     expect(card).toEqual({ id: 1, title: 'Inception', posterPath: '/a.jpg', mediaType: 'movie' })
   })
 
-  it('reads name from a tv payload', () => {
-    const card = toCardItem({ id: 2, name: 'Breaking Bad', poster_path: '/b.jpg' } as never, 'tv')
+  it('reads name from a tv item', () => {
+    const card = toCardItem({
+      id: 2,
+      name: 'Breaking Bad',
+      poster_path: '/b.jpg',
+      media_type: 'tv',
+    } as TrendingItem)
     expect(card.title).toBe('Breaking Bad')
     expect(card.mediaType).toBe('tv')
   })
 
-  it('prefers the payload media_type over the fallback argument', () => {
-    const card = toCardItem(
-      { id: 3, name: 'Show', poster_path: null, media_type: 'tv' } as never,
-      'movie',
-    )
-    expect(card.mediaType).toBe('tv')
-  })
-
   it('carries a null poster path through rather than inventing one', () => {
-    const card = toCardItem({ id: 4, title: 'X', poster_path: null } as never, 'movie')
+    const card = toCardItem({
+      id: 4,
+      title: 'X',
+      poster_path: null,
+      media_type: 'movie',
+    } as TrendingItem)
     expect(card.posterPath).toBeNull()
   })
 })
 ```
+
+Every item now carries `media_type`, because every endpoint wrapper attaches it. The old
+"prefers the payload media_type over the fallback argument" case is gone: there is no fallback
+argument any more, so there is no precedence to test.
 
 - [ ] **Step 2: Run to verify it fails**
 
@@ -1475,7 +1487,7 @@ export function toCardItem(item: TrendingItem): CardItem {
 - [ ] **Step 4: Run the tests**
 
 Run: `pnpm test tests/media.test.ts`
-Expected: PASS, 4 tests.
+Expected: PASS, 3 tests.
 
 - [ ] **Step 5: Write the poster card**
 
