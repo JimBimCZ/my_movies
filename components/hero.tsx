@@ -16,7 +16,7 @@ export async function Hero({ item }: { item: TrendingItem }) {
   return (
     <section className="relative mb-8 h-[60vh] min-h-[380px] w-full">
       {backdrop && (
-        <Image src={backdrop} alt={card.title} fill priority sizes="100vw" className="object-cover" />
+        <Image src={backdrop} alt="" fill priority sizes="100vw" className="object-cover" />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent" />
       <div className="absolute bottom-10 left-6 max-w-xl">
