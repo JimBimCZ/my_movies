@@ -728,6 +728,13 @@ At least one test per endpoint family must assert `init.next.revalidate` alongsi
 Asserting only tags leaves half of a cache policy unverified — a wrapper wired to the wrong
 window passes a fully green suite.
 
+**Every list wrapper attaches the `media_type` it statically knows, and `getTitleDetail`
+keeps the one it is handed.** A wrapper that drops a discriminant it already has pushes the
+problem into the UI: without it the card normaliser must widen to `{ title?; name? }`, take a
+fallback media type, and invent an `'Untitled'` that can never legitimately fire, and the
+detail page must narrow with `'title' in detail` on a union that could simply carry a tag.
+Attaching it here costs one `.map()` per wrapper and keeps every consumer exhaustive.
+
 **Before writing `cache.ts`, read TMDB's current published rate-limit and caching guidance.** Do not assume a specific limit — CLAUDE.md forbids it. Record what the docs actually say in the commit message. The windows below are starting values to adjust against what you read.
 
 - [ ] **Step 1: Write the cache policy**
