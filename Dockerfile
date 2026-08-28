@@ -2,11 +2,15 @@ FROM node:24-slim AS deps
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable pnpm
-COPY package.json pnpm-lock.yaml ./
-# --ignore-scripts: the only pending build scripts (esbuild, unrs-resolver) belong to
-# drizzle-kit/vitest/eslint tooling that never runs in this image; pnpm-workspace.yaml
-# deliberately leaves them unapproved rather than silenced (see git history), and that
-# gate hard-fails a non-interactive install instead of just warning.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# pnpm-workspace.yaml's allowBuilds: esbuild: true is a real, repo-committed approval, so
+# copy it in — without it esbuild's scripts are also blocked here for no reason beyond a
+# missing COPY. That leaves exactly one blocker: unrs-resolver (an eslint-only napi
+# binding pulled in by eslint-config-next, never used by `next build`), which
+# pnpm-workspace.yaml deliberately leaves unapproved rather than silenced (94f44b1 removed
+# its `false` entry on purpose). Silencing it here would contradict that decision, so
+# --ignore-scripts stays — it only needs to cover the one package the repo's own policy
+# leaves pending, not the three the COPY line was accidentally hiding.
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 FROM node:24-slim AS builder
