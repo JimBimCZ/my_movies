@@ -38,7 +38,7 @@ async function Results({ query }: { query: string }) {
 
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
   const { q } = await searchParams
-  const query = typeof q === 'string' ? q : ''
+  const query = (Array.isArray(q) ? q[0] : q) ?? ''
 
   return (
     <main>

@@ -6,17 +6,33 @@ import { useEffect, useRef, useState } from 'react'
 export function SearchInput() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [value, setValue] = useState(searchParams.get('q') ?? '')
-  const initial = useRef(true)
+  const urlQuery = searchParams.get('q') ?? ''
+  const [value, setValue] = useState(urlQuery)
+  // Tracks the query we last put in the URL ourselves, so we can tell "the
+  // URL changed because our own debounced push landed" apart from "the URL
+  // changed underneath us" (header-link click, back/forward). Only the
+  // latter should overwrite what the user is typing.
+  const lastSynced = useRef(urlQuery)
+  const skipNextDebounce = useRef(true)
 
   useEffect(() => {
-    if (initial.current) {
-      initial.current = false
+    if (urlQuery !== lastSynced.current) {
+      lastSynced.current = urlQuery
+      skipNextDebounce.current = true
+      setValue(urlQuery)
+    }
+  }, [urlQuery])
+
+  useEffect(() => {
+    if (skipNextDebounce.current) {
+      skipNextDebounce.current = false
       return
     }
     const timer = setTimeout(() => {
+      const trimmed = value.trim()
+      lastSynced.current = trimmed
       const params = new URLSearchParams()
-      if (value.trim()) params.set('q', value.trim())
+      if (trimmed) params.set('q', trimmed)
       router.replace(params.toString() ? `/search?${params}` : '/search')
     }, 300)
     return () => clearTimeout(timer)
