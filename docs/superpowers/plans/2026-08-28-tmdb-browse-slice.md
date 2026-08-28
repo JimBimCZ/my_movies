@@ -1465,7 +1465,7 @@ Expected: FAIL — cannot resolve `@/lib/media`.
 `lib/media.ts`:
 
 ```ts
-import type { MediaType, MovieListItem, TrendingItem, TvListItem } from './tmdb/types'
+import type { MediaType, MovieListItem, TrendingItem, TvListItem } from '@/server/tmdb/types'
 
 export interface CardItem {
   id: number
@@ -1885,7 +1885,7 @@ Expected: FAIL — cannot resolve `@/lib/route-params`.
 `lib/route-params.ts`:
 
 ```ts
-import type { MediaType } from './tmdb/types'
+import type { MediaType } from '@/server/tmdb/types'
 
 export function parseMediaType(value: string): MediaType | null {
   return value === 'movie' || value === 'tv' ? value : null
