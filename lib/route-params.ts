@@ -5,7 +5,8 @@ export function parseMediaType(value: string): MediaType | null {
 }
 
 export function parseTmdbId(value: string): number | null {
-  if (!/^\d+$/.test(value)) return null
+  if (!/^(0|[1-9]\d*)$/.test(value)) return null
   const id = Number(value)
-  return id > 0 ? id : null
+  if (!Number.isSafeInteger(id) || id <= 0) return null
+  return id
 }

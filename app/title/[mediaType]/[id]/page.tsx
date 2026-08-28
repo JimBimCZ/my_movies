@@ -39,7 +39,8 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
 
   const images = await getImageConfig()
   const title = detail.media_type === 'movie' ? detail.title : detail.name
-  const released = detail.media_type === 'movie' ? detail.release_date : detail.first_air_date
+  const releaseDate = detail.media_type === 'movie' ? detail.release_date : detail.first_air_date
+  const releaseYear = releaseDate ? releaseDate.slice(0, 4) : null
   const poster = buildImageUrl(
     images.secure_base_url,
     pickSize(images.poster_sizes, POSTER_SLOTS.detail),
@@ -73,7 +74,8 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
         <div className="pt-4">
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            {released?.slice(0, 4)} · {detail.vote_average.toFixed(1)} / 10
+            {releaseYear && `${releaseYear} · `}
+            {detail.vote_average.toFixed(1)} / 10
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {detail.genres.map((genre) => (
