@@ -137,3 +137,13 @@ Local values live in `.env.local`, which is gitignored. Never commit real creden
 A change is done when: the code is written, `pnpm build`, `pnpm lint` and `pnpm typecheck` pass with output you can show, the affected path has been exercised (test or manual run), and you have stated plainly which parts you verified and which you did not.
 
 If the change touches the Dockerfile, the build pipeline, the database client, or anything runtime-dependent, it is done only once the image builds and the container starts and serves a request — verified, not assumed.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -93,6 +93,12 @@ pnpm add -D vitest @types/pg drizzle-kit
 
 - [ ] **Step 5: Configure Vitest**
 
+Create `tests/stubs/server-only.ts` containing exactly:
+
+```ts
+export {}
+```
+
 `vitest.config.ts`:
 
 ```ts
@@ -105,10 +111,17 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
   },
   resolve: {
-    alias: { '@': path.resolve(__dirname, '.') },
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+      // The server-only package resolves to a module that throws unless the
+      // react-server export condition is active, which it is not under vitest.
+      'server-only': path.resolve(__dirname, 'tests/stubs/server-only.ts'),
+    },
   },
 })
 ```
+
+Do not drop the `server-only` alias. `lib/tmdb/client.ts` (Task 3) imports `server-only` to make a client-component import a build error; without this alias every test that imports the TMDB client fails at import time.
 
 - [ ] **Step 6: Add the scripts CLAUDE.md documents**
 
@@ -133,9 +146,12 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 
 describe('scaffold', () => {
-  it('builds a standalone server bundle', () => {
-    const config = readFileSync('next.config.ts', 'utf8')
-    expect(config).toContain("output: 'standalone'")
+  it('configures standalone output and the TMDB image host', async () => {
+    const { default: config } = await import('../next.config')
+    expect(config.output).toBe('standalone')
+    expect(config.images?.remotePatterns).toContainEqual(
+      expect.objectContaining({ hostname: 'image.tmdb.org' }),
+    )
   })
 
   it('keeps env files out of git', () => {
@@ -143,6 +159,8 @@ describe('scaffold', () => {
   })
 })
 ```
+
+The first test imports the config and asserts on parsed values rather than grepping the source text, so it cannot pass on a commented-out line or fail on a requote. The second deliberately does assert on file text: for `.gitignore` the text *is* the behaviour, and it guards a real regression.
 
 - [ ] **Step 8: Run the test**
 
@@ -201,12 +219,20 @@ set -a; . ./.env.local; set +a
 OUT=tests/fixtures/tmdb
 mkdir -p "$OUT"
 
+trap 'rm -f "${OUT}"/*.json.tmp' EXIT
+
 fetch() {
-  local name="$1" path="$2"
-  curl -sS --fail-with-body \
+  local name="$1"
+  local path="$2"
+  local tmp="${OUT}/${name}.json.tmp"
+  if ! curl -sS --fail-with-body \
     -H "Authorization: Bearer ${TMDB_ACCESS_TOKEN}" \
     -H "accept: application/json" \
-    "https://api.themoviedb.org/3${path}" > "${OUT}/${name}.json"
+    "https://api.themoviedb.org/3${path}" > "$tmp"; then
+    echo "failed to capture ${name}; ${OUT}/${name}.json left unchanged" >&2
+    return 1
+  fi
+  mv "$tmp" "${OUT}/${name}.json"
   echo "captured ${name}"
 }
 
@@ -223,6 +249,20 @@ fetch search-multi    "/search/multi?query=matrix"
 ```
 
 `27205` is Inception, `1396` is Breaking Bad — stable long-lived ids.
+
+The temp file matters: a bare `>` truncates the target before curl runs, so a 429 or an
+expired token on a re-run replaces a known-good committed fixture with TMDB's error body.
+These fixtures are the payload authority for Tasks 3 and 5; a corrupted one is worse than
+a failed run.
+
+Write it as an explicit `if !`, not as `curl > tmp && mv`. A command on the left of `&&`
+is exempt from `set -e`, so the one-liner short-circuits the `mv`, falls through to the
+success `echo`, and exits 0 — protecting the fixture while silently swallowing the
+failure, which is worse than the loud abort it replaced. Verified: under
+`set -euo pipefail`, `false && echo` leaves the script exiting 0.
+
+The two `local` declarations are separate statements because bash 3.2, still the macOS
+default, cannot reference an earlier `local` from the same statement under `set -u`.
 
 - [ ] **Step 2: Run it**
 
@@ -351,6 +391,17 @@ describe('captured TMDB payloads', () => {
   })
 })
 ```
+
+Any array of expected field names in this test must be bound to the interface it
+describes, not left as an inferred `string[]`. An untyped array pins fixture against
+hand-copied literals with no compile-time link to `types.ts`, so renaming or deleting a
+field there passes the whole gate silently. This file is imported by nine downstream
+tasks; the link is worth having.
+
+Use a `Record<keyof T, true>` witness rather than an `Array<keyof T>` annotation. The
+annotation catches renames and deletions but not additions, so it needs a second
+construct for exhaustiveness; one witness object catches all three. Prove it: delete,
+rename, and add a field in turn and confirm `pnpm typecheck` fails each time.
 
 - [ ] **Step 6: Run the tests**
 
@@ -661,6 +712,29 @@ git push origin main
   From `@/lib/tmdb/endpoints/search`: `searchMulti(query: string)`.
   From `@/lib/tmdb/cache`: `REVALIDATE` and `tags`.
 
+`/trending/all/week` is an "all" endpoint: TMDB documents it as returning movies, TV shows
+**and people**, exactly like `/search/multi`. It therefore needs the same person filter.
+Without it a person entry reaches the UI typed as movie-or-tv, and since a person carries
+`profile_path` and `name` rather than `poster_path` and `title`, it renders as a card with
+a null poster and an undefined title, with no type error anywhere to warn you. The
+committed `trending.json` fixture holds 20 movie/tv results and zero people, so it masks
+this case rather than covering it.
+
+Test it by splicing a real person object from `search-multi.json` into a copy of the
+trending envelope inside the test. Do not edit the captured fixture: both halves stay real
+captured data, recombined where the recombination is visible.
+
+At least one test per endpoint family must assert `init.next.revalidate` alongside the tag.
+Asserting only tags leaves half of a cache policy unverified — a wrapper wired to the wrong
+window passes a fully green suite.
+
+**Every list wrapper attaches the `media_type` it statically knows, and `getTitleDetail`
+keeps the one it is handed.** A wrapper that drops a discriminant it already has pushes the
+problem into the UI: without it the card normaliser must widen to `{ title?; name? }`, take a
+fallback media type, and invent an `'Untitled'` that can never legitimately fire, and the
+detail page must narrow with `'title' in detail` on a union that could simply carry a tag.
+Attaching it here costs one `.map()` per wrapper and keeps every consumer exhaustive.
+
 **Before writing `cache.ts`, read TMDB's current published rate-limit and caching guidance.** Do not assume a specific limit — CLAUDE.md forbids it. Record what the docs actually say in the commit message. The windows below are starting values to adjust against what you read.
 
 - [ ] **Step 1: Write the cache policy**
@@ -854,35 +928,37 @@ import { REVALIDATE, tags } from '../cache'
 import type { Genre, MovieListItem, PagedResponse, TrendingItem, TvListItem } from '../types'
 
 export async function getTrending(): Promise<TrendingItem[]> {
-  const page = await tmdbFetch<PagedResponse<TrendingItem>>('/trending/all/week', {
+  const page = await tmdbFetch<PagedResponse<SearchResultItem>>('/trending/all/week', {
     revalidate: REVALIDATE.trending,
     tags: [tags.trending],
   })
-  return page.results
+  return page.results.filter(
+    (item): item is TrendingItem => item.media_type === 'movie' || item.media_type === 'tv',
+  )
 }
 
-export async function getNowPlaying(): Promise<MovieListItem[]> {
+export async function getNowPlaying(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/movie/now_playing', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('now-playing')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 
-export async function getTopRated(): Promise<MovieListItem[]> {
+export async function getTopRated(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/movie/top_rated', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('top-rated')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 
-export async function getAiringToday(): Promise<TvListItem[]> {
+export async function getAiringToday(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<TvListItem>>('/tv/airing_today', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('airing-today')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'tv' as const }))
 }
 
 export async function getMovieGenres(): Promise<Genre[]> {
@@ -893,13 +969,13 @@ export async function getMovieGenres(): Promise<Genre[]> {
   return response.genres
 }
 
-export async function discoverByGenre(genreId: number): Promise<MovieListItem[]> {
+export async function discoverByGenre(genreId: number): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/discover/movie', {
     searchParams: { with_genres: genreId, sort_by: 'popularity.desc' },
     revalidate: REVALIDATE.list,
     tags: [tags.list(`genre-${genreId}`)],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 ```
 
@@ -926,8 +1002,13 @@ export function getTvDetail(id: number): Promise<TvDetail> {
   })
 }
 
-export function getTitleDetail(mediaType: MediaType, id: number): Promise<MovieDetail | TvDetail> {
-  return mediaType === 'movie' ? getMovieDetail(id) : getTvDetail(id)
+export type TitleDetail =
+  | (MovieDetail & { media_type: 'movie' })
+  | (TvDetail & { media_type: 'tv' })
+
+export async function getTitleDetail(mediaType: MediaType, id: number): Promise<TitleDetail> {
+  const detail = mediaType === 'movie' ? await getMovieDetail(id) : await getTvDetail(id)
+  return { ...detail, media_type: mediaType } as TitleDetail
 }
 ```
 
@@ -998,7 +1079,7 @@ git push origin main
 
 **Interfaces:**
 - Consumes: `DATABASE_URL`, `DB_DRIVER`, `VERCEL`.
-- Produces: `db` from `@/db/client`, and `resolveDriver(env): 'neon-http' | 'node-postgres'` exported from the same module for testing.
+- Produces: `getDb()` from `@/db/client`, and `resolveDriver(env): 'neon-http' | 'node-postgres'` exported from the same module for testing.
 
 - [ ] **Step 1: Write the failing driver-selection tests**
 
@@ -1081,7 +1162,15 @@ function createDb(): NodePgDatabase<typeof schema> {
   return drizzlePg(new Pool({ connectionString: url }), { schema })
 }
 
-export const db = createDb()
+let instance: NodePgDatabase<typeof schema> | undefined
+
+// next build evaluates route modules during page-data collection — reading `export const
+// dynamic` is itself what forces evaluation — so constructing at module load fails any build
+// without DATABASE_URL, including the Docker build stage.
+export function getDb(): NodePgDatabase<typeof schema> {
+  instance ??= createDb()
+  return instance
+}
 ```
 
 - [ ] **Step 5: Run the tests**
@@ -1104,19 +1193,35 @@ export default defineConfig({
 
 Do not run `db:generate` in this slice. There is no schema to migrate.
 
+**Export `getDb()`, not a `db` proxy.** A lazy `Proxy` was tried and abandoned after three
+review rounds each surfaced a new permanent-poisoning case: read traps alone made a benign
+swallowed write throw on every later read; `Object.defineProperty` with `configurable: false`
+half-applies to the instance and then poisons `ownKeys` for the process lifetime; and
+`Object.freeze(db)` breaks `ownKeys` the same way. Each was individually unreachable, and each
+was a landmine for slice 2's repositories and Auth.js adapter. A function call has none of that
+surface.
+
+**`db` must be lazy.** Verified empirically: with eager `export const db = createDb()` and no
+`DATABASE_URL`, `next build` exits 1 with `Failed to collect page data for /api/health` —
+Next loads the route module to read its exported route config, and `export const dynamic` is
+itself one of those exports, so it cannot prevent the evaluation that breaks the build. The
+Docker build stage in Task 12 runs `pnpm build` with no database, so eager construction fails
+the image build. Moving `resolveDriver` to its own module does NOT fix this: the health route
+imports `db` directly.
+
 - [ ] **Step 7: Write the health route**
 
 `app/api/health/route.ts`:
 
 ```ts
 import { sql } from 'drizzle-orm'
-import { db } from '@/db/client'
+import { getDb } from '@/db/client'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    await db.execute(sql`select 1`)
+    await getDb().execute(sql`select 1`)
     return Response.json({ status: 'ok' })
   } catch {
     return Response.json({ status: 'error', database: 'unreachable' }, { status: 503 })
@@ -1299,7 +1404,7 @@ git push origin main
 
 **Interfaces:**
 - Consumes: `buildImageUrl`, `pickSize`, `POSTER_SLOTS`, `getImageConfig` (Task 4); types (Task 2).
-- Produces: `toCardItem(item: TrendingItem | MovieListItem | TvListItem, fallbackMediaType: MediaType): CardItem` from `@/lib/media`, where `CardItem = { id: number; title: string; posterPath: string | null; mediaType: MediaType }`; `<PosterCard />`, `<Row />`, `<RowSkeleton />`.
+- Produces: `toCardItem(item: TrendingItem): CardItem` from `@/lib/media`, where `CardItem = { id: number; title: string; posterPath: string | null; mediaType: MediaType }`; `<PosterCard />`, `<Row />`, `<RowSkeleton />`.
 
 `toCardItem` is the single place the `title` / `name` divergence between movie and TV payloads is resolved. Every row and search result goes through it.
 
@@ -1310,33 +1415,45 @@ git push origin main
 ```ts
 import { describe, expect, it } from 'vitest'
 import { toCardItem } from '@/lib/media'
+import type { TrendingItem } from '@/lib/tmdb/types'
 
 describe('toCardItem', () => {
-  it('reads title from a movie payload', () => {
-    const card = toCardItem({ id: 1, title: 'Inception', poster_path: '/a.jpg' } as never, 'movie')
+  it('reads title from a movie item', () => {
+    const card = toCardItem({
+      id: 1,
+      title: 'Inception',
+      poster_path: '/a.jpg',
+      media_type: 'movie',
+    } as TrendingItem)
     expect(card).toEqual({ id: 1, title: 'Inception', posterPath: '/a.jpg', mediaType: 'movie' })
   })
 
-  it('reads name from a tv payload', () => {
-    const card = toCardItem({ id: 2, name: 'Breaking Bad', poster_path: '/b.jpg' } as never, 'tv')
+  it('reads name from a tv item', () => {
+    const card = toCardItem({
+      id: 2,
+      name: 'Breaking Bad',
+      poster_path: '/b.jpg',
+      media_type: 'tv',
+    } as TrendingItem)
     expect(card.title).toBe('Breaking Bad')
     expect(card.mediaType).toBe('tv')
   })
 
-  it('prefers the payload media_type over the fallback argument', () => {
-    const card = toCardItem(
-      { id: 3, name: 'Show', poster_path: null, media_type: 'tv' } as never,
-      'movie',
-    )
-    expect(card.mediaType).toBe('tv')
-  })
-
   it('carries a null poster path through rather than inventing one', () => {
-    const card = toCardItem({ id: 4, title: 'X', poster_path: null } as never, 'movie')
+    const card = toCardItem({
+      id: 4,
+      title: 'X',
+      poster_path: null,
+      media_type: 'movie',
+    } as TrendingItem)
     expect(card.posterPath).toBeNull()
   })
 })
 ```
+
+Every item now carries `media_type`, because every endpoint wrapper attaches it. The old
+"prefers the payload media_type over the fallback argument" case is gone: there is no fallback
+argument any more, so there is no precedence to test.
 
 - [ ] **Step 2: Run to verify it fails**
 
@@ -1357,18 +1474,12 @@ export interface CardItem {
   mediaType: MediaType
 }
 
-type AnyListItem = (TrendingItem | MovieListItem | TvListItem) & {
-  title?: string
-  name?: string
-  media_type?: MediaType
-}
-
-export function toCardItem(item: AnyListItem, fallbackMediaType: MediaType): CardItem {
+export function toCardItem(item: TrendingItem): CardItem {
   return {
     id: item.id,
-    title: item.title ?? item.name ?? 'Untitled',
+    title: item.media_type === 'movie' ? item.title : item.name,
     posterPath: item.poster_path,
-    mediaType: item.media_type ?? fallbackMediaType,
+    mediaType: item.media_type,
   }
 }
 ```
@@ -1376,7 +1487,7 @@ export function toCardItem(item: AnyListItem, fallbackMediaType: MediaType): Car
 - [ ] **Step 4: Run the tests**
 
 Run: `pnpm test tests/media.test.ts`
-Expected: PASS, 4 tests.
+Expected: PASS, 3 tests.
 
 - [ ] **Step 5: Write the poster card**
 
@@ -1579,7 +1690,7 @@ import { toCardItem } from '@/lib/media'
 
 export async function Hero({ item }: { item: TrendingItem }) {
   const images = await getImageConfig()
-  const card = toCardItem(item, 'movie')
+  const card = toCardItem(item)
   const backdrop = buildImageUrl(
     images.secure_base_url,
     pickSize(images.backdrop_sizes, BACKDROP_SLOTS.hero),
@@ -1630,27 +1741,27 @@ import {
 
 async function TrendingRow() {
   const items = await getTrending()
-  return <Row title="Trending this week" items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title="Trending this week" items={items.map((item) => toCardItem(item))} />
 }
 
 async function NowPlayingRow() {
   const items = await getNowPlaying()
-  return <Row title="Now playing" items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title="Now playing" items={items.map((item) => toCardItem(item))} />
 }
 
 async function TopRatedRow() {
   const items = await getTopRated()
-  return <Row title="Top rated" items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title="Top rated" items={items.map((item) => toCardItem(item))} />
 }
 
 async function AiringTodayRow() {
   const items = await getAiringToday()
-  return <Row title="Airing today" items={items.map((item) => toCardItem(item, 'tv'))} />
+  return <Row title="Airing today" items={items.map((item) => toCardItem(item))} />
 }
 
 async function GenreRow({ id, name }: { id: number; name: string }) {
   const items = await discoverByGenre(id)
-  return <Row title={name} items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title={name} items={items.map((item) => toCardItem(item))} />
 }
 
 async function GenreRows() {
@@ -1820,8 +1931,9 @@ export default async function TitlePage({
   })
 
   const images = await getImageConfig()
-  const title = 'title' in detail ? detail.title : detail.name
-  const released = 'release_date' in detail ? detail.release_date : detail.first_air_date
+  const title = detail.media_type === 'movie' ? detail.title : detail.name
+  const released =
+    detail.media_type === 'movie' ? detail.release_date : detail.first_air_date
   const poster = buildImageUrl(
     images.secure_base_url,
     pickSize(images.poster_sizes, POSTER_SLOTS.detail),
@@ -2009,7 +2121,7 @@ async function Results({ query }: { query: string }) {
       {items.map((item) => (
         <li key={`${item.media_type}-${item.id}`}>
           <PosterCard
-            item={toCardItem(item, item.media_type)}
+            item={toCardItem(item)}
             imageBase={images.secure_base_url}
             posterSizes={images.poster_sizes}
             variant="grid"
@@ -2199,7 +2311,10 @@ The token comes from the environment, never baked into the image.
 
 - [ ] **Step 4: Build the image**
 
+Task 6 left a `movies-pg` container bound to host port 5433, which is the port the compose stack below also binds. Remove it first or compose will fail to start:
+
 ```bash
+docker rm -f movies-pg 2>/dev/null || true
 docker build -t movies-app .
 ```
 
