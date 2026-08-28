@@ -30,6 +30,7 @@ components/     frontend — React components
 server/         backend — server-only, never reaches the client bundle
   tmdb/         TMDB API access: client, cache policy, image URLs, endpoint wrappers
   db/           Drizzle: driver selection, schema, migrations
+lib/            pure shared helpers — no I/O, safe to import from either side
 public/         static assets
 scripts/        one-off developer scripts
 tests/          vitest; tests/tmdb and tests/db cover server/tmdb and server/db
@@ -38,6 +39,7 @@ tests/          vitest; tests/tmdb and tests/db cover server/tmdb and server/db
 - `app/` holds routing and composition. A route file fetches through `server/` and renders `components/` — it does not contain fetch logic, SQL, or reusable markup.
 - A module under `server/` that holds a secret or opens a connection imports `server-only` — `server/tmdb/client.ts` and `server/db/client.ts` do — so a client component that reaches it is a build error rather than a leaked token. That guard is the reason the directory exists; give any new such module the same import.
 - `components/` never imports from `server/`. Data arrives as props from a server component.
+- `lib/` is for helpers that do no I/O and hold no secrets — view-model mapping, URL-segment parsing, formatting. That rule is what keeps it from becoming a catch-all: anything that fetches, queries, or reads an environment variable belongs under `server/`, and anything that renders belongs in `components/`. Importing a type from `server/` is fine; types are erased.
 - Import across layers with the `@/` alias (`@/server/tmdb/endpoints/lists`, `@/components/row`), not relative paths. Relative imports are for siblings within one layer.
 
 ## Agent rules
