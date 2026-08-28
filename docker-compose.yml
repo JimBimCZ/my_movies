@@ -22,9 +22,9 @@ services:
       DB_DRIVER: node-postgres
       # ${VAR:?err} fails fast instead of silently sending an empty token: without it,
       # `up` serves 200s with an empty catalogue — nothing looks broken. Export it first,
-      # e.g. `set -a; . ./.env.local; set +a`. Compose parses this for every subcommand, so
-      # `ps`/`stop`/`down` need it exported too; if you only want to tear down, any
-      # placeholder works: `TMDB_ACCESS_TOKEN=x docker compose down -v`.
+      # e.g. `set -a; . ./.env.local; set +a`. This also blocks ps/stop/down/logs (`logs`
+      # included — the command you'd reach for first); any placeholder unblocks teardown:
+      # `TMDB_ACCESS_TOKEN=x docker compose down -v`.
       TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:?set TMDB_ACCESS_TOKEN before running compose, e.g. set -a; . ./.env.local; set +a}
       AUTH_URL: http://localhost:3000
     depends_on:

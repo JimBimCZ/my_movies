@@ -3,12 +3,9 @@ WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable pnpm
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-# --ignore-scripts suppresses every script, including esbuild's now-approved one, so
-# copying pnpm-workspace.yaml changes nothing installed today — it only makes the image
-# reflect the repo's real approval policy instead of an accident of this COPY line.
-# unrs-resolver (eslint-only, see `pnpm why unrs-resolver`) is the one script that policy
-# leaves deliberately unapproved rather than silenced (94f44b1); --ignore-scripts respects
-# that instead of overriding it.
+# unrs-resolver (eslint-only) has an unapproved build script; pnpm exits 1 on it, so
+# --ignore-scripts is required here. It also suppresses esbuild's approved build — harmless,
+# next build doesn't use the native binary.
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 FROM node:24-slim AS builder
