@@ -64,14 +64,16 @@ describe('list endpoints', () => {
     expect(init.next.tags).toContain('tmdb:list:now-playing')
     expect(init.next.revalidate).toBe(REVALIDATE.list)
     expect(results[0]).toHaveProperty('title')
+    expect(results[0]!.media_type).toBe('movie')
   })
 
   it('getTopRated and getAiringToday tag their own lists', async () => {
     const fetchMock = respondWith(fixture('top-rated'))
     vi.stubGlobal('fetch', fetchMock)
     const { getTopRated } = await import('@/lib/tmdb/endpoints/lists')
-    await getTopRated()
+    const topRated = await getTopRated()
     expect(fetchMock.mock.calls[0]![1].next.tags).toContain('tmdb:list:top-rated')
+    expect(topRated[0]!.media_type).toBe('movie')
 
     vi.resetModules()
     const airingMock = respondWith(fixture('airing-today'))
@@ -80,6 +82,7 @@ describe('list endpoints', () => {
     const shows = await getAiringToday()
     expect(airingMock.mock.calls[0]![1].next.tags).toContain('tmdb:list:airing-today')
     expect(shows[0]).toHaveProperty('name')
+    expect(shows[0]!.media_type).toBe('tv')
   })
 
   it('getMovieGenres unwraps the genres envelope', async () => {
@@ -107,6 +110,16 @@ describe('list endpoints', () => {
     expect(init.next.tags).toContain(tags.list('genre-28'))
     expect(init.next.revalidate).toBe(REVALIDATE.list)
   })
+
+  it('discoverByGenre tags results as movies', async () => {
+    const fetchMock = respondWith(fixture('discover-movie'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { discoverByGenre } = await import('@/lib/tmdb/endpoints/lists')
+
+    const results = await discoverByGenre(28)
+
+    expect(results[0]!.media_type).toBe('movie')
+  })
 })
 
 describe('title endpoints', () => {
@@ -121,12 +134,13 @@ describe('title endpoints', () => {
     vi.stubGlobal('fetch', fetchMock)
     const { getTitleDetail } = await import('@/lib/tmdb/endpoints/titles')
 
-    await getTitleDetail('movie', 27205)
+    const detail = await getTitleDetail('movie', 27205)
 
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('/movie/27205')
     expect(init.next.tags).toContain('tmdb:title:movie:27205')
     expect(init.next.revalidate).toBe(REVALIDATE.detail)
+    expect(detail.media_type).toBe('movie')
   })
 
   it('getTitleDetail routes tv to the tv endpoint', async () => {
@@ -134,10 +148,11 @@ describe('title endpoints', () => {
     vi.stubGlobal('fetch', fetchMock)
     const { getTitleDetail } = await import('@/lib/tmdb/endpoints/titles')
 
-    await getTitleDetail('tv', 1396)
+    const detail = await getTitleDetail('tv', 1396)
 
     const [url] = fetchMock.mock.calls[0]!
     expect(url).toContain('/tv/1396')
+    expect(detail.media_type).toBe('tv')
   })
 })
 

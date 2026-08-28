@@ -16,6 +16,11 @@ export function getTvDetail(id: number): Promise<TvDetail> {
   })
 }
 
-export function getTitleDetail(mediaType: MediaType, id: number): Promise<MovieDetail | TvDetail> {
-  return mediaType === 'movie' ? getMovieDetail(id) : getTvDetail(id)
+export type TitleDetail =
+  | (MovieDetail & { media_type: 'movie' })
+  | (TvDetail & { media_type: 'tv' })
+
+export async function getTitleDetail(mediaType: MediaType, id: number): Promise<TitleDetail> {
+  const detail = mediaType === 'movie' ? await getMovieDetail(id) : await getTvDetail(id)
+  return { ...detail, media_type: mediaType } as TitleDetail
 }

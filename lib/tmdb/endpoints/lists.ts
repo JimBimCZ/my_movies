@@ -12,28 +12,28 @@ export async function getTrending(): Promise<TrendingItem[]> {
   )
 }
 
-export async function getNowPlaying(): Promise<MovieListItem[]> {
+export async function getNowPlaying(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/movie/now_playing', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('now-playing')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 
-export async function getTopRated(): Promise<MovieListItem[]> {
+export async function getTopRated(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/movie/top_rated', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('top-rated')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 
-export async function getAiringToday(): Promise<TvListItem[]> {
+export async function getAiringToday(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<TvListItem>>('/tv/airing_today', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('airing-today')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'tv' as const }))
 }
 
 export async function getMovieGenres(): Promise<Genre[]> {
@@ -44,11 +44,11 @@ export async function getMovieGenres(): Promise<Genre[]> {
   return response.genres
 }
 
-export async function discoverByGenre(genreId: number): Promise<MovieListItem[]> {
+export async function discoverByGenre(genreId: number): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/discover/movie', {
     searchParams: { with_genres: genreId, sort_by: 'popularity.desc' },
     revalidate: REVALIDATE.list,
     tags: [tags.list(`genre-${genreId}`)],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }

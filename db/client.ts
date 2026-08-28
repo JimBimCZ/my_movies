@@ -6,6 +6,10 @@ import * as schema from './schema'
 
 export type DriverName = 'neon-http' | 'node-postgres'
 
+// neon-http has no transaction support, so the shared type can't offer one either — a call
+// site that compiles must actually work on both drivers.
+export type Db = Omit<NodePgDatabase<typeof schema>, 'transaction'>
+
 export function resolveDriver(env: Record<string, string | undefined>): DriverName {
   const explicit = env.DB_DRIVER
   if (explicit) {
@@ -17,26 +21,26 @@ export function resolveDriver(env: Record<string, string | undefined>): DriverNa
   return env.VERCEL ? 'neon-http' : 'node-postgres'
 }
 
-function createDb(): NodePgDatabase<typeof schema> {
+function createDb(): Db {
   const url = process.env.DATABASE_URL
   if (!url) throw new Error('DATABASE_URL is not set')
 
   if (resolveDriver(process.env) === 'neon-http') {
-    // Both drivers expose the same Drizzle query-builder surface; typing the export as the
-    // node-postgres shape keeps a single type at every call site, which is what lets query
-    // code stay driver-agnostic.
-    return drizzleNeon(neon(url), { schema }) as unknown as NodePgDatabase<typeof schema>
+    // Both drivers expose the same Drizzle query-builder surface except transactions, which
+    // neon-http doesn't support; typing the export as the node-postgres shape minus
+    // `transaction` keeps a single, honest type at every call site.
+    return drizzleNeon(neon(url), { schema }) as unknown as Db
   }
 
   return drizzlePg(new Pool({ connectionString: url }), { schema })
 }
 
-let instance: NodePgDatabase<typeof schema> | undefined
+let instance: Db | undefined
 
 // next build evaluates route modules during page-data collection — reading `export const
 // dynamic` is itself what forces evaluation — so constructing at module load fails any build
 // without DATABASE_URL, including the Docker build stage.
-export function getDb(): NodePgDatabase<typeof schema> {
+export function getDb(): Db {
   instance ??= createDb()
   return instance
 }
