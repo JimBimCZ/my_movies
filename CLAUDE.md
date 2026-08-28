@@ -101,7 +101,8 @@ docker run --rm -p 3000:3000 --env-file .env.local movies-app
 - Every endpoint wrapper has an explicit TypeScript response type derived from a real response, not guessed. When adding a new endpoint, fetch it once and base the type on the actual payload.
 - Images come from TMDB's image CDN with an explicit size segment. Read `/configuration` for the current base URL and valid sizes rather than hardcoding from memory; pick the smallest size that looks right for the slot.
 - Check current rate-limit and caching guidance in TMDB's docs before designing anything that fans out into many requests. Do not assume a specific limit.
-- TMDB's terms require attribution. The footer must carry the TMDB attribution notice and logo, and must state that the app is not endorsed or certified by TMDB. Verify the exact current wording against TMDB's terms of use before changing it.
+- TMDB's terms require attribution. Section 3 of https://www.themoviedb.org/documentation/api/terms-of-use specifies the wording, verified 2026-08-28: "This [website, program, service, application, product] uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB." The footer carries that sentence with `application` chosen from the bracket, plus the TMDB logo. Re-read the terms before changing it — this is a quote, not a paraphrase, and earlier drafts of this file paraphrased it as "not endorsed or certified", which is not what TMDB requires.
+- The same section requires that TMDB's logo be "less prominent than the logos or marks that primarily describe or identify Your Application". The TMDB mark therefore stays in the footer, below the "My Movies" wordmark in the header; do not promote it into the header or scale it past the wordmark.
 - Cache aggressively. Catalogue data changes slowly; use Next's fetch cache with sensible revalidation and cache tags per endpoint family.
 
 ## Data layer
