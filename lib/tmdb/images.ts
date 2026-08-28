@@ -1,4 +1,5 @@
 import { tmdbFetch } from './client'
+import { REVALIDATE, tags } from './cache'
 import type { TmdbConfiguration } from './types'
 
 export const POSTER_SLOTS = { card: 342, detail: 500 } as const
@@ -8,6 +9,7 @@ export function pickSize(available: string[], target: number): string {
   const widths = available
     .filter((size) => size.startsWith('w'))
     .map((size) => ({ size, width: Number(size.slice(1)) }))
+    .filter(({ width }) => Number.isFinite(width))
     .sort((a, b) => a.width - b.width)
 
   const fit = widths.find((candidate) => candidate.width >= target) ?? widths[widths.length - 1]
@@ -20,8 +22,8 @@ export function buildImageUrl(base: string, size: string, path: string | null): 
 
 export async function getImageConfig(): Promise<TmdbConfiguration['images']> {
   const config = await tmdbFetch<TmdbConfiguration>('/configuration', {
-    revalidate: 60 * 60 * 24,
-    tags: ['tmdb:configuration'],
+    revalidate: REVALIDATE.configuration,
+    tags: [tags.configuration],
   })
   return config.images
 }

@@ -15,6 +15,11 @@ describe('pickSize', () => {
     expect(pickSize(POSTER_SIZES, 5000)).toBe('w780')
   })
 
+  it('ignores a malformed size entry instead of letting it win the fallback', () => {
+    const withMalformed = ['w92', 'w780', 'w_large', 'original']
+    expect(pickSize(withMalformed, 5000)).toBe('w780')
+  })
+
   it('ignores the original entry when a concrete width fits', () => {
     expect(pickSize(POSTER_SIZES, 500)).toBe('w500')
   })
