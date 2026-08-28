@@ -93,6 +93,12 @@ pnpm add -D vitest @types/pg drizzle-kit
 
 - [ ] **Step 5: Configure Vitest**
 
+Create `tests/stubs/server-only.ts` containing exactly:
+
+```ts
+export {}
+```
+
 `vitest.config.ts`:
 
 ```ts
@@ -105,10 +111,17 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
   },
   resolve: {
-    alias: { '@': path.resolve(__dirname, '.') },
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+      // The server-only package resolves to a module that throws unless the
+      // react-server export condition is active, which it is not under vitest.
+      'server-only': path.resolve(__dirname, 'tests/stubs/server-only.ts'),
+    },
   },
 })
 ```
+
+Do not drop the `server-only` alias. `lib/tmdb/client.ts` (Task 3) imports `server-only` to make a client-component import a build error; without this alias every test that imports the TMDB client fails at import time.
 
 - [ ] **Step 6: Add the scripts CLAUDE.md documents**
 
@@ -2199,7 +2212,10 @@ The token comes from the environment, never baked into the image.
 
 - [ ] **Step 4: Build the image**
 
+Task 6 left a `movies-pg` container bound to host port 5433, which is the port the compose stack below also binds. Remove it first or compose will fail to start:
+
 ```bash
+docker rm -f movies-pg 2>/dev/null || true
 docker build -t movies-app .
 ```
 
