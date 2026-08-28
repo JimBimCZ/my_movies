@@ -6,12 +6,18 @@ import { useRef, type FocusEvent, type ReactNode } from 'react'
 // leaves no room for its focus ring, which overflow-x then clips.
 const TRACK_SNAP_INSET = 24
 
+// 'instant', not 'auto': 'auto' defers to the computed scroll-behavior, which would
+// put the JS path back at the mercy of the CSS this is meant to be independent of.
+const scrollBehavior = (): ScrollBehavior =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
+
 export function RowScroller({ label, children }: { label: string; children: ReactNode }) {
   const trackRef = useRef<HTMLDivElement>(null)
 
   const scrollBy = (direction: 1 | -1) => {
     const track = trackRef.current
-    if (track) track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: 'smooth' })
+    if (track)
+      track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: scrollBehavior() })
   }
 
   // Native focus-follow (and scrollIntoView 'nearest') treats any overlap with the scrollport
@@ -28,7 +34,7 @@ export function RowScroller({ label, children }: { label: string; children: Reac
     const left = trackRect.left + TRACK_SNAP_INSET
     const fullyVisible = targetRect.left >= left && targetRect.right <= trackRect.right
     if (fullyVisible) return
-    track.scrollBy({ left: targetRect.left - left, behavior: 'smooth' })
+    track.scrollBy({ left: targetRect.left - left, behavior: scrollBehavior() })
   }
 
   return (
@@ -37,14 +43,14 @@ export function RowScroller({ label, children }: { label: string; children: Reac
         type="button"
         onClick={() => scrollBy(-1)}
         aria-label={`Scroll ${label} left`}
-        className="absolute left-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-r bg-black/70 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100 pointer-fine:block"
+        className="absolute left-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-r bg-black/70 text-white opacity-0 transition-opacity pointer-events-none focus-visible:opacity-100 focus-visible:pointer-events-auto group-hover/row:opacity-100 group-hover/row:pointer-events-auto pointer-fine:block"
       >
         ‹
       </button>
       <div
         ref={trackRef}
         onFocus={scrollFocusedIntoView}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth scroll-px-6 px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto motion-safe:scroll-smooth scroll-px-6 px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {children}
       </div>
@@ -52,7 +58,7 @@ export function RowScroller({ label, children }: { label: string; children: Reac
         type="button"
         onClick={() => scrollBy(1)}
         aria-label={`Scroll ${label} right`}
-        className="absolute right-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-l bg-black/70 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100 pointer-fine:block"
+        className="absolute right-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-l bg-black/70 text-white opacity-0 transition-opacity pointer-events-none focus-visible:opacity-100 focus-visible:pointer-events-auto group-hover/row:opacity-100 group-hover/row:pointer-events-auto pointer-fine:block"
       >
         ›
       </button>
