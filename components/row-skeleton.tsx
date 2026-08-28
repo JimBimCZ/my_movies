@@ -6,7 +6,10 @@ export function RowSkeleton({ title }: { title: string }) {
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="w-[160px] shrink-0">
             <div className="aspect-[2/3] animate-pulse rounded-md bg-white/5" />
-            <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-white/5" />
+            <div className="mt-2 h-10 space-y-1.5">
+              <div className="h-4 w-full animate-pulse rounded bg-white/5" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-white/5" />
+            </div>
           </div>
         ))}
       </div>

@@ -38,12 +38,18 @@ export function PosterCard({
             className="object-cover transition-transform duration-200 group-hover:scale-105"
           />
         ) : (
-          <span className="flex h-full items-center justify-center p-2 text-center text-xs text-[var(--muted)]">
+          <span
+            aria-hidden="true"
+            className="flex h-full items-center justify-center p-2 text-center text-xs text-[var(--muted)]"
+          >
             {item.title}
           </span>
         )}
       </div>
-      <p className="mt-2 line-clamp-2 text-sm text-[var(--muted)] group-hover:text-[var(--foreground)]">
+      <p
+        aria-hidden={src ? true : undefined}
+        className="mt-2 h-10 line-clamp-2 text-sm leading-5 text-[var(--muted)] group-hover:text-[var(--foreground)]"
+      >
         {item.title}
       </p>
     </Link>

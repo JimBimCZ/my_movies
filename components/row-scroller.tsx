@@ -16,7 +16,7 @@ export function RowScroller({ label, children }: { label: string; children: Reac
         type="button"
         onClick={() => scrollBy(-1)}
         aria-label={`Scroll ${label} left`}
-        className="absolute left-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-r bg-black/70 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100 md:block"
+        className="absolute left-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-r bg-black/70 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100 pointer-fine:block"
       >
         ‹
       </button>
@@ -30,7 +30,7 @@ export function RowScroller({ label, children }: { label: string; children: Reac
         type="button"
         onClick={() => scrollBy(1)}
         aria-label={`Scroll ${label} right`}
-        className="absolute right-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-l bg-black/70 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100 md:block"
+        className="absolute right-0 top-1/3 z-10 hidden h-16 w-10 -translate-y-1/2 rounded-l bg-black/70 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100 pointer-fine:block"
       >
         ›
       </button>
