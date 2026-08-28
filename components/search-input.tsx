@@ -11,8 +11,10 @@ export function SearchInput() {
   const [state, setState] = useState<SearchInputState>(() => initialSearchInputState(urlQuery))
   const [syncedQuery, setSyncedQuery] = useState(urlQuery)
 
-  // A URL change we didn't cause resyncs the box; one we did cause is
-  // ignored until it lands, so a late commit can't clobber newer typing.
+  // Adopt an external URL change (nothing of ours outstanding) or our own
+  // push landing (kept as typed, not overwritten); anything else in flight
+  // is ignored until it resolves. Done in render, not an effect, so the
+  // resync applies before paint instead of flashing the stale value first.
   if (urlQuery !== syncedQuery) {
     setSyncedQuery(urlQuery)
     setState((current) => syncFromUrl(current, urlQuery))
@@ -35,7 +37,7 @@ export function SearchInput() {
       <input
         type="search"
         value={state.value}
-        onChange={(event) => setState(typed(urlQuery, event.target.value))}
+        onChange={(event) => setState((current) => typed(current, urlQuery, event.target.value))}
         placeholder="Search for a title"
         autoComplete="off"
         className="w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-lg outline-none focus-visible:border-white/50"
