@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { connection } from 'next/server'
 import { Hero } from '@/components/hero'
 import { Row } from '@/components/row'
 import { RowSkeleton } from '@/components/row-skeleton'
@@ -63,7 +64,14 @@ async function HomeHero() {
   return first ? <Hero item={first} /> : null
 }
 
-export default function HomePage() {
+// `/` has no request-time inputs, so Next would prerender it at build time and
+// call TMDB during `next build`. The Docker image is built without secrets, so
+// the build must not need a token: `connection()` defers the render to request
+// time. The TMDB responses themselves stay in the fetch cache, so this costs an
+// HTML render per request, not a TMDB round-trip per request.
+export default async function HomePage() {
+  await connection()
+
   return (
     <main>
       <Suspense fallback={<div className="mb-8 h-[60vh] min-h-[380px] animate-pulse bg-white/5" />}>
