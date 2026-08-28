@@ -33,14 +33,26 @@ function createDb(): NodePgDatabase<typeof schema> {
 
 let instance: NodePgDatabase<typeof schema> | undefined
 
-// Constructing either driver requires DATABASE_URL, which is not set at module-import time in
-// unit tests (resolveDriver is tested independently of any database). Deferring construction to
-// first access, then caching it, keeps the branch-once contract without forcing every importer
-// of this module to have a database configured.
+// next build evaluates route modules during page-data collection — reading `export const
+// dynamic` is itself what forces evaluation — so eager construction fails any build without
+// DATABASE_URL, including the Docker build stage. Deferring to first access keeps the
+// branch-once contract; resolveDriver staying unit-testable is a side effect, not the reason.
 export const db: NodePgDatabase<typeof schema> = new Proxy({} as NodePgDatabase<typeof schema>, {
   get(_target, prop) {
     if (!instance) instance = createDb()
     const value = instance[prop as keyof typeof instance]
     return typeof value === 'function' ? value.bind(instance) : value
+  },
+  has(_target, prop) {
+    if (!instance) instance = createDb()
+    return prop in instance
+  },
+  ownKeys() {
+    if (!instance) instance = createDb()
+    return Reflect.ownKeys(instance)
+  },
+  getOwnPropertyDescriptor(_target, prop) {
+    if (!instance) instance = createDb()
+    return Reflect.getOwnPropertyDescriptor(instance, prop)
   },
 })
