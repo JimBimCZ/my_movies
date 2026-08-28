@@ -712,6 +712,22 @@ git push origin main
   From `@/lib/tmdb/endpoints/search`: `searchMulti(query: string)`.
   From `@/lib/tmdb/cache`: `REVALIDATE` and `tags`.
 
+`/trending/all/week` is an "all" endpoint: TMDB documents it as returning movies, TV shows
+**and people**, exactly like `/search/multi`. It therefore needs the same person filter.
+Without it a person entry reaches the UI typed as movie-or-tv, and since a person carries
+`profile_path` and `name` rather than `poster_path` and `title`, it renders as a card with
+a null poster and an undefined title, with no type error anywhere to warn you. The
+committed `trending.json` fixture holds 20 movie/tv results and zero people, so it masks
+this case rather than covering it.
+
+Test it by splicing a real person object from `search-multi.json` into a copy of the
+trending envelope inside the test. Do not edit the captured fixture: both halves stay real
+captured data, recombined where the recombination is visible.
+
+At least one test per endpoint family must assert `init.next.revalidate` alongside the tag.
+Asserting only tags leaves half of a cache policy unverified — a wrapper wired to the wrong
+window passes a fully green suite.
+
 **Before writing `cache.ts`, read TMDB's current published rate-limit and caching guidance.** Do not assume a specific limit — CLAUDE.md forbids it. Record what the docs actually say in the commit message. The windows below are starting values to adjust against what you read.
 
 - [ ] **Step 1: Write the cache policy**
@@ -905,11 +921,13 @@ import { REVALIDATE, tags } from '../cache'
 import type { Genre, MovieListItem, PagedResponse, TrendingItem, TvListItem } from '../types'
 
 export async function getTrending(): Promise<TrendingItem[]> {
-  const page = await tmdbFetch<PagedResponse<TrendingItem>>('/trending/all/week', {
+  const page = await tmdbFetch<PagedResponse<SearchResultItem>>('/trending/all/week', {
     revalidate: REVALIDATE.trending,
     tags: [tags.trending],
   })
-  return page.results
+  return page.results.filter(
+    (item): item is TrendingItem => item.media_type === 'movie' || item.media_type === 'tv',
+  )
 }
 
 export async function getNowPlaying(): Promise<MovieListItem[]> {
