@@ -3,7 +3,15 @@ import { RowScroller } from './row-scroller'
 import { getImageConfig } from '@/server/tmdb/images'
 import type { CardItem } from '@/lib/media'
 
-export async function Row({ title, items }: { title: string; items: CardItem[] }) {
+export async function Row({
+  title,
+  items,
+  priorityCount = 0,
+}: {
+  title: string
+  items: CardItem[]
+  priorityCount?: number
+}) {
   if (items.length === 0) return null
   const images = await getImageConfig()
   const headingId = `row-${crypto.randomUUID()}`
@@ -14,12 +22,13 @@ export async function Row({ title, items }: { title: string; items: CardItem[] }
         {title}
       </h2>
       <RowScroller label={title}>
-        {items.map((item) => (
+        {items.map((item, index) => (
           <PosterCard
             key={`${item.mediaType}-${item.id}`}
             item={item}
             imageBase={images.secure_base_url}
             posterSizes={images.poster_sizes}
+            priority={index < priorityCount}
           />
         ))}
       </RowScroller>
