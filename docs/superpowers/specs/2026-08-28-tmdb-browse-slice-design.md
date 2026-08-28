@@ -263,6 +263,20 @@ shown:
    credentials.
 5. Anything not verified is stated plainly as unverified.
 
+### Which database, and when
+
+`DATABASE_URL` for Neon arrives with the first Vercel deployment, which happens
+after this slice. That does not block the data layer. The `docker-compose`
+Postgres is a real database available locally today, and because the container
+path speaks plain Postgres over TCP, every item above can be satisfied against
+it without Neon existing.
+
+The consequence is that the `node-postgres` branch of `db/client.ts` is verified
+in this slice and the `neon-http` branch is not. The Neon branch ships written
+but untested, recorded as such, and confirming it is the first task of the
+deploy step rather than a loose end. This is the one deliberate verification gap
+in the slice.
+
 ## Out of scope
 
 Authentication, the watchlist and its tables, any user-owned data, and CI. Genre
@@ -272,8 +286,8 @@ rows are not part of any slice yet.
 ## Risks
 
 **Unverified at the time of writing:** every TMDB payload shape, TMDB's current
-rate-limit guidance, the current image size lists, and the exact attribution
-wording. No TMDB endpoint has been called in the course of writing this design.
+rate-limit guidance, the current image size lists, the exact attribution
+wording, and the validity of the TMDB token itself. No TMDB endpoint has been called in the course of writing this design.
 Each is listed above as a step that begins with reading the real response or the
 real document, and none of it is recorded here as fact.
 
