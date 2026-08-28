@@ -1156,16 +1156,28 @@ let instance: NodePgDatabase<typeof schema> | undefined
 // dynamic` is itself what forces evaluation — so eager construction fails any build without
 // DATABASE_URL, including the Docker build stage. Deferring to first access keeps the
 // branch-once contract; resolveDriver staying unit-testable is a side effect, not the reason.
+function load(): NodePgDatabase<typeof schema> {
+  instance ??= createDb()
+  return instance
+}
+
 export const db: NodePgDatabase<typeof schema> = new Proxy({} as NodePgDatabase<typeof schema>, {
   get(_target, prop) {
-    if (!instance) instance = createDb()
-    const value = instance[prop as keyof typeof instance]
-    return typeof value === 'function' ? value.bind(instance) : value
+    const value = load()[prop as keyof NodePgDatabase<typeof schema>]
+    return typeof value === 'function' ? value.bind(load()) : value
   },
-  has: (_t, prop) => prop in (instance ??= createDb()),
-  ownKeys: () => Reflect.ownKeys(instance ??= createDb()),
-  getOwnPropertyDescriptor: (_t, prop) =>
-    Reflect.getOwnPropertyDescriptor((instance ??= createDb()), prop),
+  has: (_t, prop) => Reflect.has(load(), prop),
+  ownKeys: () => Reflect.ownKeys(load()),
+  getOwnPropertyDescriptor: (_t, prop) => {
+    const descriptor = Reflect.getOwnPropertyDescriptor(load(), prop)
+    if (descriptor && typeof descriptor.value === 'function') {
+      descriptor.value = descriptor.value.bind(load())
+    }
+    return descriptor
+  },
+  set: (_t, prop, value) => Reflect.set(load(), prop, value),
+  defineProperty: (_t, prop, descriptor) => Reflect.defineProperty(load(), prop, descriptor),
+  deleteProperty: (_t, prop) => Reflect.deleteProperty(load(), prop),
 })
 ```
 
@@ -1188,6 +1200,17 @@ export default defineConfig({
 ```
 
 Do not run `db:generate` in this slice. There is no schema to migrate.
+
+**The proxy needs write traps, not just read traps.** `has`, `ownKeys` and
+`getOwnPropertyDescriptor` alone are actively worse than `get` alone. `[[Set]]` has no trap,
+so an assignment runs `OrdinarySet` against the empty target; it consults the new
+`getOwnPropertyDescriptor` trap, finds a writable descriptor, and calls `[[DefineOwnProperty]]`
+with a partial `{value}` descriptor. With no `defineProperty` trap the target fills the rest
+with the spec defaults `writable: false, configurable: false` — after which every read of that
+property throws `TypeError: 'get' on proxy: property ... is a read-only and non-configurable
+data property`, and so does `Object.keys(db)`. `db` is a module-level singleton, so one stray
+assignment bricks it for the life of the process. Verified by probe. Either trap the write
+paths too, or trap nothing but `get`; the half-way shape is the one that breaks.
 
 **`db` must be lazy.** Verified empirically: with eager `export const db = createDb()` and no
 `DATABASE_URL`, `next build` exits 1 with `Failed to collect page data for /api/health` —
