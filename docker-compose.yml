@@ -21,9 +21,10 @@ services:
       DATABASE_URL: postgresql://postgres:devpass@db:5432/movies
       DB_DRIVER: node-postgres
       # ${VAR:?err} fails fast instead of silently sending an empty token: without it,
-      # `docker compose up` in a shell that never sourced .env.local (compose reads .env,
-      # not .env.local) serves 200s with an empty catalogue — the worst kind of failure
-      # because nothing looks broken. Export it first, e.g. `set -a; . ./.env.local; set +a`.
+      # `up` serves 200s with an empty catalogue — nothing looks broken. Export it first,
+      # e.g. `set -a; . ./.env.local; set +a`. Compose parses this for every subcommand, so
+      # `ps`/`stop`/`down` need it exported too; if you only want to tear down, any
+      # placeholder works: `TMDB_ACCESS_TOKEN=x docker compose down -v`.
       TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:?set TMDB_ACCESS_TOKEN before running compose, e.g. set -a; . ./.env.local; set +a}
       AUTH_URL: http://localhost:3000
     depends_on:
