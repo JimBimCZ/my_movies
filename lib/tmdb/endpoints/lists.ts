@@ -1,13 +1,15 @@
 import { tmdbFetch } from '../client'
 import { REVALIDATE, tags } from '../cache'
-import type { Genre, MovieListItem, PagedResponse, TrendingItem, TvListItem } from '../types'
+import type { Genre, MovieListItem, PagedResponse, SearchResultItem, TrendingItem, TvListItem } from '../types'
 
 export async function getTrending(): Promise<TrendingItem[]> {
-  const page = await tmdbFetch<PagedResponse<TrendingItem>>('/trending/all/week', {
+  const page = await tmdbFetch<PagedResponse<SearchResultItem>>('/trending/all/week', {
     revalidate: REVALIDATE.trending,
     tags: [tags.trending],
   })
-  return page.results
+  return page.results.filter(
+    (item): item is TrendingItem => item.media_type === 'movie' || item.media_type === 'tv',
+  )
 }
 
 export async function getNowPlaying(): Promise<MovieListItem[]> {

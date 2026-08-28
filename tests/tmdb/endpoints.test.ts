@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
+import { REVALIDATE, tags } from '@/lib/tmdb/cache'
 
 const fixture = (name: string) =>
   JSON.parse(readFileSync(`tests/fixtures/tmdb/${name}.json`, 'utf8'))
@@ -26,8 +27,29 @@ describe('list endpoints', () => {
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('/trending/all/week')
     expect(init.next.tags).toContain('tmdb:trending')
+    expect(init.next.revalidate).toBe(REVALIDATE.trending)
     expect(results.length).toBeGreaterThan(0)
     expect(['movie', 'tv']).toContain(results[0]!.media_type)
+  })
+
+  it('getTrending filters out person results mixed into the payload', async () => {
+    const trendingPayload = fixture('trending')
+    const searchPayload = fixture('search-multi')
+    const person = searchPayload.results.find((item: { media_type: string }) => item.media_type === 'person')
+    const mixedPayload = {
+      ...trendingPayload,
+      results: [...trendingPayload.results, person],
+    }
+    const fetchMock = respondWith(mixedPayload)
+    vi.stubGlobal('fetch', fetchMock)
+    const { getTrending } = await import('@/lib/tmdb/endpoints/lists')
+
+    const results = await getTrending()
+
+    expect(results.length).toBe(trendingPayload.results.length)
+    for (const item of results) {
+      expect(['movie', 'tv']).toContain(item.media_type)
+    }
   })
 
   it('getNowPlaying returns movie items tagged as a list', async () => {
@@ -40,6 +62,7 @@ describe('list endpoints', () => {
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('/movie/now_playing')
     expect(init.next.tags).toContain('tmdb:list:now-playing')
+    expect(init.next.revalidate).toBe(REVALIDATE.list)
     expect(results[0]).toHaveProperty('title')
   })
 
@@ -69,17 +92,20 @@ describe('list endpoints', () => {
     expect(Array.isArray(genres)).toBe(true)
     expect(genres[0]).toHaveProperty('name')
     expect(fetchMock.mock.calls[0]![1].next.tags).toContain('tmdb:genres')
+    expect(fetchMock.mock.calls[0]![1].next.revalidate).toBe(REVALIDATE.genres)
   })
 
-  it('discoverByGenre passes the genre filter', async () => {
+  it('discoverByGenre passes the genre filter and tags the specific genre list', async () => {
     const fetchMock = respondWith(fixture('discover-movie'))
     vi.stubGlobal('fetch', fetchMock)
     const { discoverByGenre } = await import('@/lib/tmdb/endpoints/lists')
 
     await discoverByGenre(28)
 
-    const [url] = fetchMock.mock.calls[0]!
+    const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('with_genres=28')
+    expect(init.next.tags).toContain(tags.list('genre-28'))
+    expect(init.next.revalidate).toBe(REVALIDATE.list)
   })
 })
 
@@ -100,6 +126,7 @@ describe('title endpoints', () => {
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('/movie/27205')
     expect(init.next.tags).toContain('tmdb:title:movie:27205')
+    expect(init.next.revalidate).toBe(REVALIDATE.detail)
   })
 
   it('getTitleDetail routes tv to the tv endpoint', async () => {
@@ -128,6 +155,8 @@ describe('search', () => {
 
     const results = await searchMulti('matrix')
 
+    const [, init] = fetchMock.mock.calls[0]!
+    expect(init.next.revalidate).toBe(REVALIDATE.search)
     expect(results.length).toBeGreaterThan(0)
     for (const item of results) {
       expect(['movie', 'tv']).toContain(item.media_type)
