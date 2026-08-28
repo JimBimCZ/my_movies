@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the TMDB read path — home with mixed movie/TV rows, title detail, search — together with the deployment substrate (`db/client.ts`, `/api/health`, a Docker image that has been built and run).
+**Goal:** Build the TMDB read path — home with mixed movie/TV rows, title detail, search — together with the deployment substrate (`server/db/client.ts`, `/api/health`, a Docker image that has been built and run).
 
-**Architecture:** All TMDB access funnels through `lib/tmdb/`, which is server-only; response types are derived from captured real payloads, never guessed. Pages are server components, with `'use client'` confined to the search input and the row scroll controls. `db/client.ts` selects a Drizzle driver once at module load — `neon-http` on Vercel, `node-postgres` in a container — and exports one instance whose type does not vary.
+**Architecture:** All TMDB access funnels through `server/tmdb/`, which is server-only; response types are derived from captured real payloads, never guessed. Pages are server components, with `'use client'` confined to the search input and the row scroll controls. `server/db/client.ts` selects a Drizzle driver once at module load — `neon-http` on Vercel, `node-postgres` in a container — and exports one instance whose type does not vary.
 
 **Tech Stack:** Next.js 16 (App Router), TypeScript strict, Tailwind CSS, Drizzle ORM + Drizzle Kit, `@neondatabase/serverless`, `pg`, Vitest, Docker.
 
@@ -15,7 +15,7 @@
 - Node 24. pnpm 11.24.0 (verified installed). Docker 29.6.2 (verified installed).
 - `next.config.ts` sets `output: 'standalone'`.
 - `TMDB_ACCESS_TOKEN` is server-only. No `NEXT_PUBLIC_` prefix, no TMDB fetch from a client component, ever.
-- Every TMDB request goes through `lib/tmdb/`. No `fetch('https://api.themoviedb.org/...')` anywhere else.
+- Every TMDB request goes through `server/tmdb/`. No `fetch('https://api.themoviedb.org/...')` anywhere else.
 - Every endpoint wrapper has an explicit response type derived from a captured payload in `tests/fixtures/tmdb/`.
 - TMDB image base URL is `https://image.tmdb.org/t/p/` — verified against `/configuration` on 2026-08-28, HTTP 200.
   Verified `poster_sizes`: `w92, w154, w185, w342, w500, w780, original`.
@@ -121,7 +121,7 @@ export default defineConfig({
 })
 ```
 
-Do not drop the `server-only` alias. `lib/tmdb/client.ts` (Task 3) imports `server-only` to make a client-component import a build error; without this alias every test that imports the TMDB client fails at import time.
+Do not drop the `server-only` alias. `server/tmdb/client.ts` (Task 3) imports `server-only` to make a client-component import a build error; without this alias every test that imports the TMDB client fails at import time.
 
 - [ ] **Step 6: Add the scripts CLAUDE.md documents**
 
@@ -198,12 +198,12 @@ git push origin main
 ### Task 2: Capture TMDB fixtures and derive response types
 
 **Files:**
-- Create: `scripts/capture-tmdb-fixtures.sh`, `tests/fixtures/tmdb/*.json`, `lib/tmdb/types.ts`
+- Create: `scripts/capture-tmdb-fixtures.sh`, `tests/fixtures/tmdb/*.json`, `server/tmdb/types.ts`
 - Test: `tests/tmdb/types.test.ts`
 
 **Interfaces:**
 - Consumes: `TMDB_ACCESS_TOKEN` from `.env.local`.
-- Produces: `MediaType`, `MovieListItem`, `TvListItem`, `TrendingItem`, `PagedResponse<T>`, `MovieDetail`, `TvDetail`, `Genre`, `SearchResultItem`, `TmdbConfiguration` from `@/lib/tmdb/types`.
+- Produces: `MediaType`, `MovieListItem`, `TvListItem`, `TrendingItem`, `PagedResponse<T>`, `MovieDetail`, `TvDetail`, `Genre`, `SearchResultItem`, `TmdbConfiguration` from `@/server/tmdb/types`.
 
 **This task must complete before any other type is written.** TMDB's field names and pagination differ between endpoints and between v3 and v4; a type generalised from a neighbouring endpoint is probably wrong.
 
@@ -291,7 +291,7 @@ done
 
 Read this output. Write the types in Step 4 from what it actually prints — in particular check whether `trending` items carry a `media_type` discriminator that the single-type list endpoints lack, and whether the detail endpoints are the list item plus fields or a different shape entirely.
 
-- [ ] **Step 4: Write lib/tmdb/types.ts**
+- [ ] **Step 4: Write server/tmdb/types.ts**
 
 Write it against the Step 3 output. The skeleton below is the required *structure*; field lists must match the captured payloads, adding or removing fields as the real data dictates.
 
@@ -358,7 +358,7 @@ export interface TmdbConfiguration {
 ```ts
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import type { PagedResponse, TrendingItem, TmdbConfiguration } from '@/lib/tmdb/types'
+import type { PagedResponse, TrendingItem, TmdbConfiguration } from '@/server/tmdb/types'
 
 const load = (name: string) =>
   JSON.parse(readFileSync(`tests/fixtures/tmdb/${name}.json`, 'utf8'))
@@ -424,12 +424,12 @@ git push origin main
 ### Task 3: The TMDB fetch client
 
 **Files:**
-- Create: `lib/tmdb/client.ts`
+- Create: `server/tmdb/client.ts`
 - Test: `tests/tmdb/client.test.ts`
 
 **Interfaces:**
 - Consumes: `TMDB_ACCESS_TOKEN`.
-- Produces: `tmdbFetch<T>(path: string, options?: TmdbFetchOptions): Promise<T>` and `class TmdbError extends Error { status: number }` from `@/lib/tmdb/client`.
+- Produces: `tmdbFetch<T>(path: string, options?: TmdbFetchOptions): Promise<T>` and `class TmdbError extends Error { status: number }` from `@/server/tmdb/client`.
   `TmdbFetchOptions = { searchParams?: Record<string, string | number | undefined>; revalidate?: number; tags?: string[] }`
 
 - [ ] **Step 1: Write the failing tests**
@@ -455,7 +455,7 @@ describe('tmdbFetch', () => {
   it('sends the token as a bearer header', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({ id: 1 }))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/movie/27205')
 
@@ -467,7 +467,7 @@ describe('tmdbFetch', () => {
   it('builds the url against the v3 base and appends search params', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({}))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/discover/movie', { searchParams: { with_genres: 28, page: 1 } })
 
@@ -478,7 +478,7 @@ describe('tmdbFetch', () => {
   it('omits undefined search params', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({}))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/search/multi', { searchParams: { query: 'matrix', page: undefined } })
 
@@ -489,7 +489,7 @@ describe('tmdbFetch', () => {
   it('passes revalidate and tags through to the fetch cache', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({}))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/trending/all/week', { revalidate: 3600, tags: ['tmdb:trending'] })
 
@@ -501,7 +501,7 @@ describe('tmdbFetch', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ status_message: 'Not found' }), { status: 404 }),
     ))
-    const { tmdbFetch, TmdbError } = await import('@/lib/tmdb/client')
+    const { tmdbFetch, TmdbError } = await import('@/server/tmdb/client')
 
     await expect(tmdbFetch('/movie/0')).rejects.toBeInstanceOf(TmdbError)
     await expect(tmdbFetch('/movie/0')).rejects.toMatchObject({ status: 404 })
@@ -510,7 +510,7 @@ describe('tmdbFetch', () => {
   it('throws when the token is missing', async () => {
     delete process.env.TMDB_ACCESS_TOKEN
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(ok({})))
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await expect(tmdbFetch('/configuration')).rejects.toThrow(/TMDB_ACCESS_TOKEN/)
   })
@@ -520,11 +520,11 @@ describe('tmdbFetch', () => {
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm test tests/tmdb/client.test.ts`
-Expected: FAIL — cannot resolve `@/lib/tmdb/client`.
+Expected: FAIL — cannot resolve `@/server/tmdb/client`.
 
 - [ ] **Step 3: Implement the client**
 
-`lib/tmdb/client.ts`:
+`server/tmdb/client.ts`:
 
 ```ts
 import 'server-only'
@@ -597,12 +597,12 @@ git push origin main
 ### Task 4: Image URL construction
 
 **Files:**
-- Create: `lib/tmdb/images.ts`
+- Create: `server/tmdb/images.ts`
 - Test: `tests/tmdb/images.test.ts`
 
 **Interfaces:**
 - Consumes: `tmdbFetch` from Task 3, `TmdbConfiguration` from Task 2.
-- Produces: `getImageConfig(): Promise<TmdbConfiguration['images']>`, `buildImageUrl(base: string, size: string, path: string | null): string | null`, `pickSize(available: string[], target: number): string`, and `POSTER_SLOTS` / `BACKDROP_SLOTS` from `@/lib/tmdb/images`.
+- Produces: `getImageConfig(): Promise<TmdbConfiguration['images']>`, `buildImageUrl(base: string, size: string, path: string | null): string | null`, `pickSize(available: string[], target: number): string`, and `POSTER_SLOTS` / `BACKDROP_SLOTS` from `@/server/tmdb/images`.
 
 Sizes are read from `/configuration` at runtime, never hardcoded. `pickSize` selects the smallest available width at or above the slot's target, falling back to the largest non-`original` size when nothing is big enough.
 
@@ -612,7 +612,7 @@ Sizes are read from `/configuration` at runtime, never hardcoded. `pickSize` sel
 
 ```ts
 import { describe, expect, it } from 'vitest'
-import { buildImageUrl, pickSize } from '@/lib/tmdb/images'
+import { buildImageUrl, pickSize } from '@/server/tmdb/images'
 
 const POSTER_SIZES = ['w92', 'w154', 'w185', 'w342', 'w500', 'w780', 'original']
 const BASE = 'https://image.tmdb.org/t/p/'
@@ -647,11 +647,11 @@ describe('buildImageUrl', () => {
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm test tests/tmdb/images.test.ts`
-Expected: FAIL — cannot resolve `@/lib/tmdb/images`.
+Expected: FAIL — cannot resolve `@/server/tmdb/images`.
 
 - [ ] **Step 3: Implement**
 
-`lib/tmdb/images.ts`:
+`server/tmdb/images.ts`:
 
 ```ts
 import { tmdbFetch } from './client'
@@ -702,15 +702,15 @@ git push origin main
 ### Task 5: Endpoint wrappers and cache policy
 
 **Files:**
-- Create: `lib/tmdb/cache.ts`, `lib/tmdb/endpoints/lists.ts`, `lib/tmdb/endpoints/titles.ts`, `lib/tmdb/endpoints/search.ts`
+- Create: `server/tmdb/cache.ts`, `server/tmdb/endpoints/lists.ts`, `server/tmdb/endpoints/titles.ts`, `server/tmdb/endpoints/search.ts`
 - Test: `tests/tmdb/endpoints.test.ts`
 
 **Interfaces:**
 - Consumes: `tmdbFetch` (Task 3), all types (Task 2).
-- Produces, from `@/lib/tmdb/endpoints/lists`: `getTrending()`, `getNowPlaying()`, `getTopRated()`, `getAiringToday()`, `getMovieGenres()`, `discoverByGenre(genreId: number)`.
-  From `@/lib/tmdb/endpoints/titles`: `getMovieDetail(id: number)`, `getTvDetail(id: number)`, `getTitleDetail(mediaType: MediaType, id: number)`.
-  From `@/lib/tmdb/endpoints/search`: `searchMulti(query: string)`.
-  From `@/lib/tmdb/cache`: `REVALIDATE` and `tags`.
+- Produces, from `@/server/tmdb/endpoints/lists`: `getTrending()`, `getNowPlaying()`, `getTopRated()`, `getAiringToday()`, `getMovieGenres()`, `discoverByGenre(genreId: number)`.
+  From `@/server/tmdb/endpoints/titles`: `getMovieDetail(id: number)`, `getTvDetail(id: number)`, `getTitleDetail(mediaType: MediaType, id: number)`.
+  From `@/server/tmdb/endpoints/search`: `searchMulti(query: string)`.
+  From `@/server/tmdb/cache`: `REVALIDATE` and `tags`.
 
 `/trending/all/week` is an "all" endpoint: TMDB documents it as returning movies, TV shows
 **and people**, exactly like `/search/multi`. It therefore needs the same person filter.
@@ -739,7 +739,7 @@ Attaching it here costs one `.map()` per wrapper and keeps every consumer exhaus
 
 - [ ] **Step 1: Write the cache policy**
 
-`lib/tmdb/cache.ts`:
+`server/tmdb/cache.ts`:
 
 ```ts
 export const REVALIDATE = {
@@ -787,7 +787,7 @@ describe('list endpoints', () => {
   it('getTrending requests the week window and tags the result', async () => {
     const fetchMock = respondWith(fixture('trending'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTrending } = await import('@/lib/tmdb/endpoints/lists')
+    const { getTrending } = await import('@/server/tmdb/endpoints/lists')
 
     const results = await getTrending()
 
@@ -801,7 +801,7 @@ describe('list endpoints', () => {
   it('getNowPlaying returns movie items tagged as a list', async () => {
     const fetchMock = respondWith(fixture('now-playing'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getNowPlaying } = await import('@/lib/tmdb/endpoints/lists')
+    const { getNowPlaying } = await import('@/server/tmdb/endpoints/lists')
 
     const results = await getNowPlaying()
 
@@ -814,14 +814,14 @@ describe('list endpoints', () => {
   it('getTopRated and getAiringToday tag their own lists', async () => {
     const fetchMock = respondWith(fixture('top-rated'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTopRated } = await import('@/lib/tmdb/endpoints/lists')
+    const { getTopRated } = await import('@/server/tmdb/endpoints/lists')
     await getTopRated()
     expect(fetchMock.mock.calls[0]![1].next.tags).toContain('tmdb:list:top-rated')
 
     vi.resetModules()
     const airingMock = respondWith(fixture('airing-today'))
     vi.stubGlobal('fetch', airingMock)
-    const { getAiringToday } = await import('@/lib/tmdb/endpoints/lists')
+    const { getAiringToday } = await import('@/server/tmdb/endpoints/lists')
     const shows = await getAiringToday()
     expect(airingMock.mock.calls[0]![1].next.tags).toContain('tmdb:list:airing-today')
     expect(shows[0]).toHaveProperty('name')
@@ -830,7 +830,7 @@ describe('list endpoints', () => {
   it('getMovieGenres unwraps the genres envelope', async () => {
     const fetchMock = respondWith(fixture('genres-movie'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getMovieGenres } = await import('@/lib/tmdb/endpoints/lists')
+    const { getMovieGenres } = await import('@/server/tmdb/endpoints/lists')
 
     const genres = await getMovieGenres()
 
@@ -842,7 +842,7 @@ describe('list endpoints', () => {
   it('discoverByGenre passes the genre filter', async () => {
     const fetchMock = respondWith(fixture('discover-movie'))
     vi.stubGlobal('fetch', fetchMock)
-    const { discoverByGenre } = await import('@/lib/tmdb/endpoints/lists')
+    const { discoverByGenre } = await import('@/server/tmdb/endpoints/lists')
 
     await discoverByGenre(28)
 
@@ -861,7 +861,7 @@ describe('title endpoints', () => {
   it('getTitleDetail routes movie to the movie endpoint with a per-title tag', async () => {
     const fetchMock = respondWith(fixture('movie-detail'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTitleDetail } = await import('@/lib/tmdb/endpoints/titles')
+    const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
 
     await getTitleDetail('movie', 27205)
 
@@ -873,7 +873,7 @@ describe('title endpoints', () => {
   it('getTitleDetail routes tv to the tv endpoint', async () => {
     const fetchMock = respondWith(fixture('tv-detail'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTitleDetail } = await import('@/lib/tmdb/endpoints/titles')
+    const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
 
     await getTitleDetail('tv', 1396)
 
@@ -892,7 +892,7 @@ describe('search', () => {
   it('drops person results, keeping only movie and tv', async () => {
     const fetchMock = respondWith(fixture('search-multi'))
     vi.stubGlobal('fetch', fetchMock)
-    const { searchMulti } = await import('@/lib/tmdb/endpoints/search')
+    const { searchMulti } = await import('@/server/tmdb/endpoints/search')
 
     const results = await searchMulti('matrix')
 
@@ -905,7 +905,7 @@ describe('search', () => {
   it('returns an empty array for a blank query without calling TMDB', async () => {
     const fetchMock = respondWith(fixture('search-multi'))
     vi.stubGlobal('fetch', fetchMock)
-    const { searchMulti } = await import('@/lib/tmdb/endpoints/search')
+    const { searchMulti } = await import('@/server/tmdb/endpoints/search')
 
     expect(await searchMulti('   ')).toEqual([])
     expect(fetchMock).not.toHaveBeenCalled()
@@ -920,7 +920,7 @@ Expected: FAIL — modules not found.
 
 - [ ] **Step 4: Implement the list endpoints**
 
-`lib/tmdb/endpoints/lists.ts`:
+`server/tmdb/endpoints/lists.ts`:
 
 ```ts
 import { tmdbFetch } from '../client'
@@ -981,7 +981,7 @@ export async function discoverByGenre(genreId: number): Promise<TrendingItem[]> 
 
 - [ ] **Step 5: Implement the title endpoints**
 
-`lib/tmdb/endpoints/titles.ts`:
+`server/tmdb/endpoints/titles.ts`:
 
 ```ts
 import { tmdbFetch } from '../client'
@@ -1014,7 +1014,7 @@ export async function getTitleDetail(mediaType: MediaType, id: number): Promise<
 
 - [ ] **Step 6: Implement search**
 
-`lib/tmdb/endpoints/search.ts`:
+`server/tmdb/endpoints/search.ts`:
 
 ```ts
 import { tmdbFetch } from '../client'
@@ -1039,7 +1039,7 @@ export async function searchMulti(query: string): Promise<TrendingItem[]> {
 
 - [ ] **Step 7: Fold images.ts onto the shared cache constants**
 
-Task 4 hardcoded the configuration revalidation window and tag because `cache.ts` did not exist yet. Now it does, so remove the duplication — in `lib/tmdb/images.ts`:
+Task 4 hardcoded the configuration revalidation window and tag because `cache.ts` did not exist yet. Now it does, so remove the duplication — in `server/tmdb/images.ts`:
 
 ```ts
 import { REVALIDATE, tags } from './cache'
@@ -1074,12 +1074,12 @@ git push origin main
 ### Task 6: Database client and health route
 
 **Files:**
-- Create: `db/schema.ts`, `db/client.ts`, `drizzle.config.ts`, `app/api/health/route.ts`
+- Create: `server/db/schema.ts`, `server/db/client.ts`, `drizzle.config.ts`, `app/api/health/route.ts`
 - Test: `tests/db/client.test.ts`
 
 **Interfaces:**
 - Consumes: `DATABASE_URL`, `DB_DRIVER`, `VERCEL`.
-- Produces: `getDb()` from `@/db/client`, and `resolveDriver(env): 'neon-http' | 'node-postgres'` exported from the same module for testing.
+- Produces: `getDb()` from `@/server/db/client`, and `resolveDriver(env): 'neon-http' | 'node-postgres'` exported from the same module for testing.
 
 - [ ] **Step 1: Write the failing driver-selection tests**
 
@@ -1087,7 +1087,7 @@ git push origin main
 
 ```ts
 import { describe, expect, it } from 'vitest'
-import { resolveDriver } from '@/db/client'
+import { resolveDriver } from '@/server/db/client'
 
 describe('resolveDriver', () => {
   it('honours an explicit DB_DRIVER over runtime inference', () => {
@@ -1112,21 +1112,21 @@ describe('resolveDriver', () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `pnpm test tests/db/client.test.ts`
-Expected: FAIL — cannot resolve `@/db/client`.
+Expected: FAIL — cannot resolve `@/server/db/client`.
 
 - [ ] **Step 3: Write the empty schema**
 
-`db/schema.ts`:
+`server/db/schema.ts`:
 
 ```ts
 export {}
 ```
 
-The tables — Auth.js's `users`, `accounts`, `sessions`, and `watchlist_items` — are slice 2. This file exists so `db/client.ts` is typed against it from the start.
+The tables — Auth.js's `users`, `accounts`, `sessions`, and `watchlist_items` — are slice 2. This file exists so `server/db/client.ts` is typed against it from the start.
 
 - [ ] **Step 4: Implement the client**
 
-`db/client.ts`:
+`server/db/client.ts`:
 
 ```ts
 import { neon } from '@neondatabase/serverless'
@@ -1185,7 +1185,7 @@ import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './db/schema.ts',
+  schema: './server/db/schema.ts',
   out: './db/migrations',
   dbCredentials: { url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL! },
 })
@@ -1215,7 +1215,7 @@ imports `db` directly.
 
 ```ts
 import { sql } from 'drizzle-orm'
-import { getDb } from '@/db/client'
+import { getDb } from '@/server/db/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -1415,7 +1415,7 @@ git push origin main
 ```ts
 import { describe, expect, it } from 'vitest'
 import { toCardItem } from '@/lib/media'
-import type { TrendingItem } from '@/lib/tmdb/types'
+import type { TrendingItem } from '@/server/tmdb/types'
 
 describe('toCardItem', () => {
   it('reads title from a movie item', () => {
@@ -1496,7 +1496,7 @@ Expected: PASS, 3 tests.
 ```tsx
 import Image from 'next/image'
 import Link from 'next/link'
-import { buildImageUrl, POSTER_SLOTS, pickSize } from '@/lib/tmdb/images'
+import { buildImageUrl, POSTER_SLOTS, pickSize } from '@/server/tmdb/images'
 import type { CardItem } from '@/lib/media'
 
 interface PosterCardProps {
@@ -1604,7 +1604,7 @@ The arrows are an enhancement for pointer users. Keyboard users tab through the 
 ```tsx
 import { PosterCard } from './poster-card'
 import { RowScroller } from './row-scroller'
-import { getImageConfig } from '@/lib/tmdb/images'
+import { getImageConfig } from '@/server/tmdb/images'
 import type { CardItem } from '@/lib/media'
 
 export async function Row({ title, items }: { title: string; items: CardItem[] }) {
@@ -1684,8 +1684,8 @@ git push origin main
 ```tsx
 import Image from 'next/image'
 import Link from 'next/link'
-import { BACKDROP_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/lib/tmdb/images'
-import type { TrendingItem } from '@/lib/tmdb/types'
+import { BACKDROP_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/server/tmdb/images'
+import type { TrendingItem } from '@/server/tmdb/types'
 import { toCardItem } from '@/lib/media'
 
 export async function Hero({ item }: { item: TrendingItem }) {
@@ -1737,7 +1737,7 @@ import {
   getNowPlaying,
   getTopRated,
   getTrending,
-} from '@/lib/tmdb/endpoints/lists'
+} from '@/server/tmdb/endpoints/lists'
 
 async function TrendingRow() {
   const items = await getTrending()
@@ -1910,10 +1910,10 @@ Expected: PASS, 4 tests.
 ```tsx
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getTitleDetail } from '@/lib/tmdb/endpoints/titles'
-import { BACKDROP_SLOTS, POSTER_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/lib/tmdb/images'
+import { getTitleDetail } from '@/server/tmdb/endpoints/titles'
+import { BACKDROP_SLOTS, POSTER_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/server/tmdb/images'
 import { parseMediaType, parseTmdbId } from '@/lib/route-params'
-import { TmdbError } from '@/lib/tmdb/client'
+import { TmdbError } from '@/server/tmdb/client'
 
 export default async function TitlePage({
   params,
@@ -2098,8 +2098,8 @@ import { Suspense } from 'react'
 import { PosterCard } from '@/components/poster-card'
 import { SearchInput } from '@/components/search-input'
 import { toCardItem } from '@/lib/media'
-import { searchMulti } from '@/lib/tmdb/endpoints/search'
-import { getImageConfig } from '@/lib/tmdb/images'
+import { searchMulti } from '@/server/tmdb/endpoints/search'
+import { getImageConfig } from '@/server/tmdb/images'
 
 async function Results({ query }: { query: string }) {
   if (!query.trim()) {
@@ -2397,7 +2397,7 @@ State plainly, in the commit body and to the human:
 - which routes were loaded and rendered real TMDB data
 - the health route's 200 and its 503
 - the image build, the container serving `/`, and the unhealthy transition
-- **that the `neon-http` branch of `db/client.ts` is written but unverified**, because no Neon `DATABASE_URL` existed during this slice, and that confirming it is the first task of the deploy step
+- **that the `neon-http` branch of `server/db/client.ts` is written but unverified**, because no Neon `DATABASE_URL` existed during this slice, and that confirming it is the first task of the deploy step
 
 - [ ] **Step 4: Commit and push**
 

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { REVALIDATE, tags } from '@/lib/tmdb/cache'
+import { REVALIDATE, tags } from '@/server/tmdb/cache'
 
 const fixture = (name: string) =>
   JSON.parse(readFileSync(`tests/fixtures/tmdb/${name}.json`, 'utf8'))
@@ -20,7 +20,7 @@ describe('list endpoints', () => {
   it('getTrending requests the week window and tags the result', async () => {
     const fetchMock = respondWith(fixture('trending'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTrending } = await import('@/lib/tmdb/endpoints/lists')
+    const { getTrending } = await import('@/server/tmdb/endpoints/lists')
 
     const results = await getTrending()
 
@@ -42,7 +42,7 @@ describe('list endpoints', () => {
     }
     const fetchMock = respondWith(mixedPayload)
     vi.stubGlobal('fetch', fetchMock)
-    const { getTrending } = await import('@/lib/tmdb/endpoints/lists')
+    const { getTrending } = await import('@/server/tmdb/endpoints/lists')
 
     const results = await getTrending()
 
@@ -55,7 +55,7 @@ describe('list endpoints', () => {
   it('getNowPlaying returns movie items tagged as a list', async () => {
     const fetchMock = respondWith(fixture('now-playing'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getNowPlaying } = await import('@/lib/tmdb/endpoints/lists')
+    const { getNowPlaying } = await import('@/server/tmdb/endpoints/lists')
 
     const results = await getNowPlaying()
 
@@ -70,7 +70,7 @@ describe('list endpoints', () => {
   it('getTopRated and getAiringToday tag their own lists', async () => {
     const fetchMock = respondWith(fixture('top-rated'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTopRated } = await import('@/lib/tmdb/endpoints/lists')
+    const { getTopRated } = await import('@/server/tmdb/endpoints/lists')
     const topRated = await getTopRated()
     expect(fetchMock.mock.calls[0]![1].next.tags).toContain('tmdb:list:top-rated')
     expect(topRated[0]!.media_type).toBe('movie')
@@ -78,7 +78,7 @@ describe('list endpoints', () => {
     vi.resetModules()
     const airingMock = respondWith(fixture('airing-today'))
     vi.stubGlobal('fetch', airingMock)
-    const { getAiringToday } = await import('@/lib/tmdb/endpoints/lists')
+    const { getAiringToday } = await import('@/server/tmdb/endpoints/lists')
     const shows = await getAiringToday()
     expect(airingMock.mock.calls[0]![1].next.tags).toContain('tmdb:list:airing-today')
     expect(shows[0]).toHaveProperty('name')
@@ -88,7 +88,7 @@ describe('list endpoints', () => {
   it('getMovieGenres unwraps the genres envelope', async () => {
     const fetchMock = respondWith(fixture('genres-movie'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getMovieGenres } = await import('@/lib/tmdb/endpoints/lists')
+    const { getMovieGenres } = await import('@/server/tmdb/endpoints/lists')
 
     const genres = await getMovieGenres()
 
@@ -101,7 +101,7 @@ describe('list endpoints', () => {
   it('discoverByGenre passes the genre filter and tags the specific genre list', async () => {
     const fetchMock = respondWith(fixture('discover-movie'))
     vi.stubGlobal('fetch', fetchMock)
-    const { discoverByGenre } = await import('@/lib/tmdb/endpoints/lists')
+    const { discoverByGenre } = await import('@/server/tmdb/endpoints/lists')
 
     await discoverByGenre(28)
 
@@ -114,7 +114,7 @@ describe('list endpoints', () => {
   it('discoverByGenre tags results as movies', async () => {
     const fetchMock = respondWith(fixture('discover-movie'))
     vi.stubGlobal('fetch', fetchMock)
-    const { discoverByGenre } = await import('@/lib/tmdb/endpoints/lists')
+    const { discoverByGenre } = await import('@/server/tmdb/endpoints/lists')
 
     const results = await discoverByGenre(28)
 
@@ -132,7 +132,7 @@ describe('title endpoints', () => {
   it('getTitleDetail routes movie to the movie endpoint with a per-title tag', async () => {
     const fetchMock = respondWith(fixture('movie-detail'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTitleDetail } = await import('@/lib/tmdb/endpoints/titles')
+    const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
 
     const detail = await getTitleDetail('movie', 27205)
 
@@ -146,7 +146,7 @@ describe('title endpoints', () => {
   it('getTitleDetail routes tv to the tv endpoint', async () => {
     const fetchMock = respondWith(fixture('tv-detail'))
     vi.stubGlobal('fetch', fetchMock)
-    const { getTitleDetail } = await import('@/lib/tmdb/endpoints/titles')
+    const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
 
     const detail = await getTitleDetail('tv', 1396)
 
@@ -166,7 +166,7 @@ describe('search', () => {
   it('drops person results, keeping only movie and tv', async () => {
     const fetchMock = respondWith(fixture('search-multi'))
     vi.stubGlobal('fetch', fetchMock)
-    const { searchMulti } = await import('@/lib/tmdb/endpoints/search')
+    const { searchMulti } = await import('@/server/tmdb/endpoints/search')
 
     const results = await searchMulti('matrix')
 
@@ -181,7 +181,7 @@ describe('search', () => {
   it('returns an empty array for a blank query without calling TMDB', async () => {
     const fetchMock = respondWith(fixture('search-multi'))
     vi.stubGlobal('fetch', fetchMock)
-    const { searchMulti } = await import('@/lib/tmdb/endpoints/search')
+    const { searchMulti } = await import('@/server/tmdb/endpoints/search')
 
     expect(await searchMulti('   ')).toEqual([])
     expect(fetchMock).not.toHaveBeenCalled()

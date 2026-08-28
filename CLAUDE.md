@@ -20,6 +20,26 @@ TMDB is the source of catalogue data. Our database stores only users, watchlist 
 
 Do not introduce a new library, ORM, state manager, or UI kit without asking first. If a task seems to need one, say what it would solve and let the human decide.
 
+## Project layout
+
+The tree separates backend from frontend explicitly. Put new code in the layer it belongs to; do not reach across.
+
+```
+app/            routes only — page.tsx, layout.tsx, loading.tsx, route.ts
+components/     frontend — React components
+server/         backend — server-only, never reaches the client bundle
+  tmdb/         TMDB API access: client, cache policy, image URLs, endpoint wrappers
+  db/           Drizzle: driver selection, schema, migrations
+public/         static assets
+scripts/        one-off developer scripts
+tests/          vitest; tests/tmdb and tests/db cover server/tmdb and server/db
+```
+
+- `app/` holds routing and composition. A route file fetches through `server/` and renders `components/` — it does not contain fetch logic, SQL, or reusable markup.
+- A module under `server/` that holds a secret or opens a connection imports `server-only` — `server/tmdb/client.ts` and `server/db/client.ts` do — so a client component that reaches it is a build error rather than a leaked token. That guard is the reason the directory exists; give any new such module the same import.
+- `components/` never imports from `server/`. Data arrives as props from a server component.
+- Import across layers with the `@/` alias (`@/server/tmdb/endpoints/lists`, `@/components/row`), not relative paths. Relative imports are for siblings within one layer.
+
 ## Agent rules
 
 ### Prove before asserting
@@ -75,7 +95,7 @@ docker run --rm -p 3000:3000 --env-file .env.local movies-app
 ## TMDB integration
 
 - The API key/read token is server-only. It must never reach the client bundle: no `NEXT_PUBLIC_` prefix, no fetch to TMDB from a client component. All TMDB calls go through server components, route handlers, or server actions.
-- All TMDB access goes through `lib/tmdb/`. Do not scatter `fetch('https://api.themoviedb.org/...')` calls across components.
+- All TMDB access goes through `server/tmdb/`. Do not scatter `fetch('https://api.themoviedb.org/...')` calls across components.
 - Every endpoint wrapper has an explicit TypeScript response type derived from a real response, not guessed. When adding a new endpoint, fetch it once and base the type on the actual payload.
 - Images come from TMDB's image CDN with an explicit size segment. Read `/configuration` for the current base URL and valid sizes rather than hardcoding from memory; pick the smallest size that looks right for the slot.
 - Check current rate-limit and caching guidance in TMDB's docs before designing anything that fans out into many requests. Do not assume a specific limit.
@@ -84,12 +104,12 @@ docker run --rm -p 3000:3000 --env-file .env.local movies-app
 
 ## Data layer
 
-- Schema lives in `db/schema.ts`. Change the schema, generate a migration, apply it. Never hand-edit a generated migration file or run ad-hoc DDL against the database.
+- Schema lives in `server/db/schema.ts`. Change the schema, generate a migration, apply it. Never hand-edit a generated migration file or run ad-hoc DDL against the database.
 - Tables we own: users, accounts/sessions (Auth.js), `watchlist_items`.
 - A watchlist item stores `user_id`, `tmdb_id`, `media_type` ('movie' | 'tv'), `added_at`, and a small denormalised snapshot (title, poster path) so the watchlist page renders without a TMDB round-trip per item. Treat the snapshot as a cache; TMDB is the source of truth.
 - Unique constraint on `(user_id, tmdb_id, media_type)`. Adding an existing item is idempotent, not an error.
 - Every watchlist query filters by the session user id. Never trust a user id from the request body or a query param.
-- The driver is selected once, in `db/client.ts`, based on the runtime — not per call site. On Vercel, the Neon serverless driver over HTTP; in a long-running container, a pooled TCP connection. Everything above that file imports the same Drizzle instance and does not know which is in use.
+- The driver is selected once, in `server/db/client.ts`, based on the runtime — not per call site. On Vercel, the Neon serverless driver over HTTP; in a long-running container, a pooled TCP connection. Everything above that file imports the same Drizzle instance and does not know which is in use.
 - Never open a long-lived pool in a serverless function, and never open a fresh HTTP connection per query in the container path.
 - Query code must stay driver-agnostic: no raw driver types in function signatures, no HTTP- or pool-specific behaviour leaking into repositories.
 

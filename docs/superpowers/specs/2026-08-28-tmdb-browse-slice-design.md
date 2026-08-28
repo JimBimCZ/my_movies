@@ -13,7 +13,7 @@ That is more than one implementation plan can carry. It decomposes into three
 slices, each with its own spec, plan, and implementation cycle:
 
 1. **This slice.** The TMDB read path (home, detail, search) plus the deployment
-   substrate: `db/client.ts`, `/api/health`, and a Docker image that has been
+   substrate: `server/db/client.ts`, `/api/health`, and a Docker image that has been
    built and run.
 2. Auth.js sessions, the `users`/`accounts`/`sessions`/`watchlist_items` schema,
    and the optimistic watchlist toggle.
@@ -25,7 +25,7 @@ Deployment substrate belongs in slice 1 rather than slice 3 for two reasons.
 runtime-dependent changes as an image that builds, starts, and serves a request;
 deferring that defers the riskiest verification to the end. And the `HEALTHCHECK`
 the Docker section requires depends on `/api/health`, which depends on
-`db/client.ts`, so the database client cannot be postponed either.
+`server/db/client.ts`, so the database client cannot be postponed either.
 
 ## Decisions
 
@@ -65,7 +65,7 @@ hold with one driver: Drizzle's `neon-http` is HTTP-only and Neon-only, and the
 `neon-serverless` WebSocket pool still needs a Neon endpoint or a `wsproxy`
 sidecar, which the Docker section forbids.
 
-`db/client.ts` therefore branches once, at module load, on the runtime:
+`server/db/client.ts` therefore branches once, at module load, on the runtime:
 `drizzle-orm/neon-http` on Vercel, `drizzle-orm/node-postgres` with a real `Pool`
 in the container. This adds `pg` and `@types/pg`. `CLAUDE.md`'s Stack section has
 been amended to say so.
@@ -105,7 +105,7 @@ Anything else calls `notFound()`. This is the only place the union is enforced,
 and every downstream consumer — including slice 2's watchlist key — receives an
 already-narrowed value.
 
-## `lib/tmdb/`
+## `server/tmdb/`
 
 Every TMDB request in the application originates here. No component, page, or
 handler outside this directory calls `fetch` against `api.themoviedb.org`.
@@ -165,7 +165,7 @@ itself is checked rather than remembered.
 
 ## Data layer
 
-`db/client.ts` selects the driver once and exposes it through `getDb()`, which builds the
+`server/db/client.ts` selects the driver once and exposes it through `getDb()`, which builds the
 instance on first call and memoises it.
 Nothing above this file knows which driver is in use, and query code takes and
 returns no driver-specific types.
@@ -183,8 +183,8 @@ build. An accessor is used rather than a lazy proxy: a proxy over a Drizzle inst
 every trap to stay consistent, and a missing one poisons the shared singleton for the life of
 the process.
 
-`drizzle.config.ts` and `db/schema.ts` are created in this slice. `schema.ts`
-starts with no table definitions: it exists so that `db/client.ts` can be typed
+`drizzle.config.ts` and `server/db/schema.ts` are created in this slice. `schema.ts`
+starts with no table definitions: it exists so that `server/db/client.ts` can be typed
 against it and so slice 2 adds tables to a file that is already wired up. The
 application tables — Auth.js's `users`, `accounts`, `sessions`, and
 `watchlist_items` — are slice 2's work, along with the first migration. No
@@ -277,7 +277,7 @@ Postgres is a real database available locally today, and because the container
 path speaks plain Postgres over TCP, every item above can be satisfied against
 it without Neon existing.
 
-The consequence is that the `node-postgres` branch of `db/client.ts` is verified
+The consequence is that the `node-postgres` branch of `server/db/client.ts` is verified
 in this slice and the `neon-http` branch is not. The Neon branch ships written
 but untested, recorded as such, and confirming it is the first task of the
 deploy step rather than a loose end. This is the one deliberate verification gap

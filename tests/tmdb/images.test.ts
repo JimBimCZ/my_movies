@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildImageUrl, pickSize } from '@/lib/tmdb/images'
+import { buildImageUrl, pickSize } from '@/server/tmdb/images'
 
 const POSTER_SIZES = ['w92', 'w154', 'w185', 'w342', 'w500', 'w780', 'original']
 const BASE = 'https://image.tmdb.org/t/p/'

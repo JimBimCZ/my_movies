@@ -16,7 +16,7 @@ describe('tmdbFetch', () => {
   it('sends the token as a bearer header', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({ id: 1 }))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/movie/27205')
 
@@ -28,7 +28,7 @@ describe('tmdbFetch', () => {
   it('builds the url against the v3 base and appends search params', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({}))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/discover/movie', { searchParams: { with_genres: 28, page: 1 } })
 
@@ -39,7 +39,7 @@ describe('tmdbFetch', () => {
   it('omits undefined search params', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({}))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/search/multi', { searchParams: { query: 'matrix', page: undefined } })
 
@@ -50,7 +50,7 @@ describe('tmdbFetch', () => {
   it('passes revalidate and tags through to the fetch cache', async () => {
     const fetchMock = vi.fn().mockResolvedValue(ok({}))
     vi.stubGlobal('fetch', fetchMock)
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await tmdbFetch('/trending/all/week', { revalidate: 3600, tags: ['tmdb:trending'] })
 
@@ -62,7 +62,7 @@ describe('tmdbFetch', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ status_message: 'Not found' }), { status: 404 }),
     ))
-    const { tmdbFetch, TmdbError } = await import('@/lib/tmdb/client')
+    const { tmdbFetch, TmdbError } = await import('@/server/tmdb/client')
 
     await expect(tmdbFetch('/movie/0')).rejects.toBeInstanceOf(TmdbError)
     await expect(tmdbFetch('/movie/0')).rejects.toMatchObject({ status: 404 })
@@ -71,7 +71,7 @@ describe('tmdbFetch', () => {
   it('throws when the token is missing', async () => {
     delete process.env.TMDB_ACCESS_TOKEN
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(ok({})))
-    const { tmdbFetch } = await import('@/lib/tmdb/client')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
 
     await expect(tmdbFetch('/configuration')).rejects.toThrow(/TMDB_ACCESS_TOKEN/)
   })
