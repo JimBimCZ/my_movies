@@ -68,6 +68,7 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
             alt={title}
             width={220}
             height={330}
+            priority
             className="w-[220px] shrink-0 rounded-md shadow-2xl"
           />
         )}

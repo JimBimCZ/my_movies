@@ -21,18 +21,23 @@ async function Results({ query }: { query: string }) {
   }
 
   return (
-    <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 py-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
-      {items.map((item) => (
-        <li key={`${item.media_type}-${item.id}`}>
-          <PosterCard
-            item={toCardItem(item)}
-            imageBase={images.secure_base_url}
-            posterSizes={images.poster_sizes}
-            variant="grid"
-          />
-        </li>
-      ))}
-    </ul>
+    <>
+      <p className="sr-only">
+        {items.length} result{items.length === 1 ? '' : 's'} for {query}.
+      </p>
+      <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 py-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
+        {items.map((item) => (
+          <li key={`${item.media_type}-${item.id}`}>
+            <PosterCard
+              item={toCardItem(item)}
+              imageBase={images.secure_base_url}
+              posterSizes={images.poster_sizes}
+              variant="grid"
+            />
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }
 
@@ -42,12 +47,17 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
 
   return (
     <main>
+      <h1 className="mx-auto max-w-2xl px-6 pt-8 text-2xl font-bold tracking-tight">Search</h1>
       <Suspense>
         <SearchInput />
       </Suspense>
-      <Suspense key={query} fallback={<ResultsSkeleton />}>
-        <Results query={query} />
-      </Suspense>
+      {/* The live region is outside the boundary so it survives the swap: the skeleton
+          holds no text, and the summary Results adds when it resolves is announced. */}
+      <div aria-live="polite">
+        <Suspense key={query} fallback={<ResultsSkeleton />}>
+          <Results query={query} />
+        </Suspense>
+      </div>
     </main>
   )
 }

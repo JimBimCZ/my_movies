@@ -23,13 +23,10 @@ export function markRequested(state: SearchInputState, query: string): SearchInp
   return { value: state.value, requested: query }
 }
 
-// `requested` is the only thing that tells our own navigation landing apart
-// from one we did not cause: an incoming query we already asked for is that
-// landing, and must leave the box exactly as typed. Anything else is
-// external, and replaces the box. This holds one request, not a queue, so a
-// pair of our own commits arriving out of order would read as external and
-// clobber; the 300ms debounce keeps two of ours in flight only briefly, and
-// every commit observed in a throttled browser has been ordered.
+// Holds one request, not a queue. Two of our own commits landing out of order
+// would read as external and clobber the box — but that cannot happen: Next's
+// router supersedes an in-flight navigation rather than racing it, measured at
+// five overlap offsets.
 export function syncFromUrl(state: SearchInputState, urlQuery: string): SearchInputState {
   if (urlQuery === state.requested) return state
   return { value: urlQuery, requested: urlQuery }

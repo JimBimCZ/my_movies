@@ -1,7 +1,11 @@
 export function RowSkeleton({ title }: { title: string }) {
+  const headingId = `row-skeleton-${crypto.randomUUID()}`
+
   return (
-    <section className="mb-8">
-      <h2 className="mb-3 px-6 text-lg font-semibold">{title}</h2>
+    <section className="mb-8" aria-labelledby={headingId}>
+      <h2 id={headingId} className="mb-3 px-6 text-lg font-semibold">
+        {title}
+      </h2>
       <div className="flex gap-3 overflow-hidden px-6 pb-2">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="w-[160px] shrink-0">
