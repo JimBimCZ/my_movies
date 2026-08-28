@@ -1150,7 +1150,23 @@ function createDb(): NodePgDatabase<typeof schema> {
   return drizzlePg(new Pool({ connectionString: url }), { schema })
 }
 
-export const db = createDb()
+let instance: NodePgDatabase<typeof schema> | undefined
+
+// next build evaluates route modules during page-data collection — reading `export const
+// dynamic` is itself what forces evaluation — so eager construction fails any build without
+// DATABASE_URL, including the Docker build stage. Deferring to first access keeps the
+// branch-once contract; resolveDriver staying unit-testable is a side effect, not the reason.
+export const db: NodePgDatabase<typeof schema> = new Proxy({} as NodePgDatabase<typeof schema>, {
+  get(_target, prop) {
+    if (!instance) instance = createDb()
+    const value = instance[prop as keyof typeof instance]
+    return typeof value === 'function' ? value.bind(instance) : value
+  },
+  has: (_t, prop) => prop in (instance ??= createDb()),
+  ownKeys: () => Reflect.ownKeys(instance ??= createDb()),
+  getOwnPropertyDescriptor: (_t, prop) =>
+    Reflect.getOwnPropertyDescriptor((instance ??= createDb()), prop),
+})
 ```
 
 - [ ] **Step 5: Run the tests**
@@ -1172,6 +1188,14 @@ export default defineConfig({
 ```
 
 Do not run `db:generate` in this slice. There is no schema to migrate.
+
+**`db` must be lazy.** Verified empirically: with eager `export const db = createDb()` and no
+`DATABASE_URL`, `next build` exits 1 with `Failed to collect page data for /api/health` —
+Next loads the route module to read its exported route config, and `export const dynamic` is
+itself one of those exports, so it cannot prevent the evaluation that breaks the build. The
+Docker build stage in Task 12 runs `pnpm build` with no database, so eager construction fails
+the image build. Moving `resolveDriver` to its own module does NOT fix this: the health route
+imports `db` directly.
 
 - [ ] **Step 7: Write the health route**
 

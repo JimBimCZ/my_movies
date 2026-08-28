@@ -174,8 +174,10 @@ The branch reads an explicit `DB_DRIVER` environment variable accepting
 `process.env.VERCEL` is present and `node-postgres` otherwise. An explicit
 variable rather than inference alone means the container can be pointed at Neon,
 and a Vercel preview at a plain Postgres, without a code change — and it makes
-the selection greppable instead of implicit. The branch is evaluated once at
-module load, never per call.
+the selection greppable instead of implicit. The branch is evaluated once, on first
+access rather than at module load, and memoised — never per call. Laziness is not a style
+choice: `next build` evaluates route modules while collecting page data, so a `db` built at
+import time fails any build without `DATABASE_URL`, including the container image build.
 
 `drizzle.config.ts` and `db/schema.ts` are created in this slice. `schema.ts`
 starts with no table definitions: it exists so that `db/client.ts` can be typed
