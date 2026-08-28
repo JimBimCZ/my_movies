@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 
 describe('scaffold', () => {
-  it('builds a standalone server bundle', () => {
-    const config = readFileSync('next.config.ts', 'utf8')
-    expect(config).toContain("output: 'standalone'")
+  it('configures standalone output and the TMDB image host', async () => {
+    const { default: config } = await import('../next.config')
+    expect(config.output).toBe('standalone')
+    expect(config.images?.remotePatterns).toContainEqual(
+      expect.objectContaining({ hostname: 'image.tmdb.org' }),
+    )
   })
 
   it('keeps env files out of git', () => {
