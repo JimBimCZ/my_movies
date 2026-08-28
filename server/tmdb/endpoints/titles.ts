@@ -21,6 +21,7 @@ export type TitleDetail =
   | (TvDetail & { media_type: 'tv' })
 
 export async function getTitleDetail(mediaType: MediaType, id: number): Promise<TitleDetail> {
-  const detail = mediaType === 'movie' ? await getMovieDetail(id) : await getTvDetail(id)
-  return { ...detail, media_type: mediaType } as TitleDetail
+  return mediaType === 'movie'
+    ? { ...(await getMovieDetail(id)), media_type: 'movie' }
+    : { ...(await getTvDetail(id)), media_type: 'tv' }
 }

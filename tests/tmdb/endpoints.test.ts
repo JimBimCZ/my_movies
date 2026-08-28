@@ -141,6 +141,7 @@ describe('title endpoints', () => {
     expect(init.next.tags).toContain('tmdb:title:movie:27205')
     expect(init.next.revalidate).toBe(REVALIDATE.detail)
     expect(detail.media_type).toBe('movie')
+    expect(detail).toEqual({ ...fixture('movie-detail'), media_type: 'movie' })
   })
 
   it('getTitleDetail routes tv to the tv endpoint', async () => {
@@ -153,6 +154,7 @@ describe('title endpoints', () => {
     const [url] = fetchMock.mock.calls[0]!
     expect(url).toContain('/tv/1396')
     expect(detail.media_type).toBe('tv')
+    expect(detail).toEqual({ ...fixture('tv-detail'), media_type: 'tv' })
   })
 })
 
