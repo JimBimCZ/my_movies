@@ -219,12 +219,20 @@ set -a; . ./.env.local; set +a
 OUT=tests/fixtures/tmdb
 mkdir -p "$OUT"
 
+trap 'rm -f "${OUT}"/*.json.tmp' EXIT
+
 fetch() {
-  local name="$1" path="$2"
-  curl -sS --fail-with-body \
+  local name="$1"
+  local path="$2"
+  local tmp="${OUT}/${name}.json.tmp"
+  if ! curl -sS --fail-with-body \
     -H "Authorization: Bearer ${TMDB_ACCESS_TOKEN}" \
     -H "accept: application/json" \
-    "https://api.themoviedb.org/3${path}" > "${OUT}/${name}.json"
+    "https://api.themoviedb.org/3${path}" > "$tmp"; then
+    echo "failed to capture ${name}; ${OUT}/${name}.json left unchanged" >&2
+    return 1
+  fi
+  mv "$tmp" "${OUT}/${name}.json"
   echo "captured ${name}"
 }
 
@@ -241,6 +249,20 @@ fetch search-multi    "/search/multi?query=matrix"
 ```
 
 `27205` is Inception, `1396` is Breaking Bad — stable long-lived ids.
+
+The temp file matters: a bare `>` truncates the target before curl runs, so a 429 or an
+expired token on a re-run replaces a known-good committed fixture with TMDB's error body.
+These fixtures are the payload authority for Tasks 3 and 5; a corrupted one is worse than
+a failed run.
+
+Write it as an explicit `if !`, not as `curl > tmp && mv`. A command on the left of `&&`
+is exempt from `set -e`, so the one-liner short-circuits the `mv`, falls through to the
+success `echo`, and exits 0 — protecting the fixture while silently swallowing the
+failure, which is worse than the loud abort it replaced. Verified: under
+`set -euo pipefail`, `false && echo` leaves the script exiting 0.
+
+The two `local` declarations are separate statements because bash 3.2, still the macOS
+default, cannot reference an earlier `local` from the same statement under `set -u`.
 
 - [ ] **Step 2: Run it**
 
@@ -369,6 +391,17 @@ describe('captured TMDB payloads', () => {
   })
 })
 ```
+
+Any array of expected field names in this test must be bound to the interface it
+describes, not left as an inferred `string[]`. An untyped array pins fixture against
+hand-copied literals with no compile-time link to `types.ts`, so renaming or deleting a
+field there passes the whole gate silently. This file is imported by nine downstream
+tasks; the link is worth having.
+
+Use a `Record<keyof T, true>` witness rather than an `Array<keyof T>` annotation. The
+annotation catches renames and deletions but not additions, so it needs a second
+construct for exhaustiveness; one witness object catches all three. Prove it: delete,
+rename, and add a field in turn and confirm `pnpm typecheck` fails each time.
 
 - [ ] **Step 6: Run the tests**
 
