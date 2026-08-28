@@ -70,6 +70,19 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+// During a server render Next replaces globalThis.fetch with a per-render
+// deduping wrapper (server/lib/dedupe-fetch.js). It memoises on url + method +
+// headers, so a retry with an identical url and init is served a clone of the
+// 429 we are retrying and never reaches TMDB. A signal is that wrapper's
+// documented opt-out, so each retry carries its own never-aborted one. Only the
+// retries do: the first call keeps the dedupe that collapses the home page's
+// repeated /configuration reads into a single request.
+//
+// The 429 bodies we abandon here are deliberately left unread. The wrapper hands
+// out ReadableStream tee branches; cancelling one branch does not settle until
+// its sibling is cancelled too, so awaiting body.cancel() hangs the render
+// forever. Next registers both branches with a FinalizationRegistry that cancels
+// them on GC, which is the documented undici contract for a skipped body.
 export async function tmdbFetch<T>(path: string, options: TmdbFetchOptions = {}): Promise<T> {
   const token = process.env.TMDB_ACCESS_TOKEN
   if (!token) {
@@ -91,9 +104,8 @@ export async function tmdbFetch<T>(path: string, options: TmdbFetchOptions = {})
   let response = await fetch(url.toString(), init)
 
   for (let attempt = 1; response.status === 429 && attempt < MAX_FETCH_ATTEMPTS; attempt++) {
-    await response.body?.cancel()
     await delay(retryDelayMs(response.headers.get('retry-after')))
-    response = await fetch(url.toString(), init)
+    response = await fetch(url.toString(), { ...init, signal: new AbortController().signal })
   }
 
   if (!response.ok) {

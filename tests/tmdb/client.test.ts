@@ -96,9 +96,18 @@ describe('tmdbFetch', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('exhausts retries on repeated 429s and throws TmdbError with status 429', async () => {
+  it('exhausts retries on repeated 429s and reports the last response body', async () => {
     vi.useFakeTimers()
-    const fetchMock = vi.fn().mockResolvedValue(rateLimited())
+    let call = 0
+    // A fresh Response per call, not one shared instance: production hands each
+    // attempt a separate body, and a shared one would let a message-extraction
+    // regression pass.
+    const fetchMock = vi.fn().mockImplementation(async () => {
+      call += 1
+      return new Response(JSON.stringify({ status_message: `Too Many Requests #${call}` }), {
+        status: 429,
+      })
+    })
     vi.stubGlobal('fetch', fetchMock)
     const { tmdbFetch, TmdbError } = await import('@/server/tmdb/client')
 
@@ -107,8 +116,60 @@ describe('tmdbFetch', () => {
     await vi.runAllTimersAsync()
     await rejection
 
-    await expect(pending).rejects.toMatchObject({ status: 429 })
+    await expect(pending).rejects.toMatchObject({
+      status: 429,
+      message: 'Too Many Requests #3',
+    })
     expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('gives every retry its own signal so Next cannot serve it the memoised 429', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(rateLimited())
+      .mockResolvedValueOnce(rateLimited())
+      .mockResolvedValueOnce(ok({ id: 1 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const { tmdbFetch } = await import('@/server/tmdb/client')
+
+    const pending = tmdbFetch('/movie/27205')
+    await vi.runAllTimersAsync()
+    await pending
+
+    const [, first] = fetchMock.mock.calls[0]!
+    const [, second] = fetchMock.mock.calls[1]!
+    const [, third] = fetchMock.mock.calls[2]!
+    expect(first.signal).toBeUndefined()
+    expect(second.signal).toBeInstanceOf(AbortSignal)
+    expect(third.signal).toBeInstanceOf(AbortSignal)
+    expect(second.signal).not.toBe(third.signal)
+    expect(second.signal.aborted).toBe(false)
+  })
+
+  it('draws the fallback delay afresh each time rather than a constant', async () => {
+    vi.useFakeTimers()
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+    const { tmdbFetch } = await import('@/server/tmdb/client')
+
+    for (let draw = 0; draw < 12; draw += 1) {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValueOnce(rateLimited()).mockResolvedValueOnce(ok({ id: 1 })),
+      )
+      const pending = tmdbFetch('/movie/27205')
+      await vi.runAllTimersAsync()
+      await pending
+    }
+
+    const delays = setTimeoutSpy.mock.calls.map(([, ms]) => ms as number)
+    expect(delays).toHaveLength(12)
+    for (const ms of delays) {
+      expect(ms).toBeGreaterThanOrEqual(750)
+      expect(ms).toBeLessThanOrEqual(1250)
+    }
+    expect(new Set(delays).size).toBeGreaterThan(1)
+    setTimeoutSpy.mockRestore()
   })
 
   it('honours Retry-After given as delta-seconds', async () => {
