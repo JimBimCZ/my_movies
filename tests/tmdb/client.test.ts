@@ -103,11 +103,11 @@ describe('tmdbFetch', () => {
     const { tmdbFetch, TmdbError } = await import('@/server/tmdb/client')
 
     const pending = tmdbFetch('/movie/27205')
-    pending.catch(() => {})
+    const rejection = expect(pending).rejects.toBeInstanceOf(TmdbError)
     await vi.runAllTimersAsync()
+    await rejection
 
-    await expect(pending).rejects.toBeInstanceOf(TmdbError)
-    await expect(pending.catch((e: unknown) => e)).resolves.toMatchObject({ status: 429 })
+    await expect(pending).rejects.toMatchObject({ status: 429 })
     expect(fetchMock).toHaveBeenCalledTimes(3)
   })
 
@@ -134,13 +134,13 @@ describe('tmdbFetch', () => {
     vi.setSystemTime(new Date('2026-08-28T00:00:00Z'))
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(rateLimited({ 'retry-after': 'Fri, 28 Aug 2026 00:00:03 GMT' }))
+      .mockResolvedValueOnce(rateLimited({ 'retry-after': 'Fri, 28 Aug 2026 00:00:01 GMT' }))
       .mockResolvedValueOnce(ok({ id: 1 }))
     vi.stubGlobal('fetch', fetchMock)
     const { tmdbFetch } = await import('@/server/tmdb/client')
 
     const pending = tmdbFetch('/movie/27205')
-    await vi.advanceTimersByTimeAsync(2999)
+    await vi.advanceTimersByTimeAsync(999)
     expect(fetchMock).toHaveBeenCalledTimes(1)
     await vi.advanceTimersByTimeAsync(1)
     expect(fetchMock).toHaveBeenCalledTimes(2)
@@ -148,7 +148,24 @@ describe('tmdbFetch', () => {
     await expect(pending).resolves.toEqual({ id: 1 })
   })
 
-  it('falls back to a fixed delay when Retry-After is absent', async () => {
+  it('clamps a past HTTP-date Retry-After to zero rather than a negative timeout', async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(rateLimited({ 'retry-after': 'Mon, 01 Jan 2001 00:00:00 GMT' }))
+      .mockResolvedValueOnce(ok({ id: 1 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const { tmdbFetch } = await import('@/server/tmdb/client')
+
+    await expect(tmdbFetch('/movie/27205')).resolves.toEqual({ id: 1 })
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const [, delayMs] = setTimeoutSpy.mock.calls[0]!
+    expect(delayMs).toBeGreaterThanOrEqual(0)
+    setTimeoutSpy.mockRestore()
+  })
+
+  it('falls back to a jittered delay within +/-25% when Retry-After is absent', async () => {
     vi.useFakeTimers()
     const fetchMock = vi
       .fn()
@@ -158,15 +175,15 @@ describe('tmdbFetch', () => {
     const { tmdbFetch } = await import('@/server/tmdb/client')
 
     const pending = tmdbFetch('/movie/27205')
-    await vi.advanceTimersByTimeAsync(999)
+    await vi.advanceTimersByTimeAsync(749)
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    await vi.advanceTimersByTimeAsync(1)
+    await vi.advanceTimersByTimeAsync(501)
     expect(fetchMock).toHaveBeenCalledTimes(2)
 
     await expect(pending).resolves.toEqual({ id: 1 })
   })
 
-  it('falls back to a fixed delay when Retry-After is unparseable', async () => {
+  it('falls back to a jittered delay within +/-25% when Retry-After is unparseable', async () => {
     vi.useFakeTimers()
     const fetchMock = vi
       .fn()
@@ -176,9 +193,9 @@ describe('tmdbFetch', () => {
     const { tmdbFetch } = await import('@/server/tmdb/client')
 
     const pending = tmdbFetch('/movie/27205')
-    await vi.advanceTimersByTimeAsync(999)
+    await vi.advanceTimersByTimeAsync(749)
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    await vi.advanceTimersByTimeAsync(1)
+    await vi.advanceTimersByTimeAsync(501)
     expect(fetchMock).toHaveBeenCalledTimes(2)
 
     await expect(pending).resolves.toEqual({ id: 1 })
@@ -194,7 +211,7 @@ describe('tmdbFetch', () => {
     const { tmdbFetch } = await import('@/server/tmdb/client')
 
     const pending = tmdbFetch('/movie/27205')
-    await vi.advanceTimersByTimeAsync(4999)
+    await vi.advanceTimersByTimeAsync(1999)
     expect(fetchMock).toHaveBeenCalledTimes(1)
     await vi.advanceTimersByTimeAsync(1)
     expect(fetchMock).toHaveBeenCalledTimes(2)

@@ -5,13 +5,22 @@ const BASE_URL = 'https://api.themoviedb.org/3'
 // TMDB documents no Retry-After units or backoff advice, only "respect the 429
 // if you receive one" (verified against the live rate-limiting page, 2026-08-28).
 // These numbers are our own policy, not TMDB's:
-// - RETRY_CEILING_MS bounds the worst case wait so a hostile or mistaken
-//   Retry-After can never stall a page render or build for long.
+// - RETRY_CEILING_MS bounds the worst case wait. It only binds when a Retry-After
+//   header is present and larger than this: TMDB documents sending no header at
+//   all, and its rate-limit window is roughly a second at ~40 req/s, so a longer
+//   ceiling cannot make a real window recover any faster — it would just hold a
+//   render open longer. Kept tight as a safety net against a hostile or mistaken
+//   header, not as a limit we expect legitimate traffic to hit.
 // - MAX_FETCH_ATTEMPTS(3) = 1 initial call + 2 retries, worst case
-//   2 * RETRY_CEILING_MS = 10s before giving up.
-// - RETRY_FALLBACK_MS is used when Retry-After is absent or unparseable.
-const RETRY_CEILING_MS = 5_000
+//   2 * RETRY_CEILING_MS = 4s before giving up.
+// - RETRY_FALLBACK_MS is used when Retry-After is absent or unparseable — the
+//   normal case, since TMDB sends no header at all. RETRY_FALLBACK_JITTER_RATIO
+//   spreads it +/-25% so concurrent requests that all hit a 429 together don't
+//   all retry on the same tick and resynchronise into another burst against the
+//   limit we're trying to respect.
+const RETRY_CEILING_MS = 2_000
 const RETRY_FALLBACK_MS = 1_000
+const RETRY_FALLBACK_JITTER_RATIO = 0.25
 const MAX_FETCH_ATTEMPTS = 3
 
 export interface TmdbFetchOptions {
@@ -34,9 +43,14 @@ function clampMs(ms: number): number {
   return Math.min(Math.max(ms, 0), RETRY_CEILING_MS)
 }
 
+function jitteredFallbackMs(): number {
+  const spread = RETRY_FALLBACK_MS * RETRY_FALLBACK_JITTER_RATIO
+  return clampMs(RETRY_FALLBACK_MS + (Math.random() * 2 - 1) * spread)
+}
+
 function retryDelayMs(retryAfter: string | null): number {
   if (retryAfter === null) {
-    return RETRY_FALLBACK_MS
+    return jitteredFallbackMs()
   }
 
   const trimmed = retryAfter.trim()
@@ -49,7 +63,7 @@ function retryDelayMs(retryAfter: string | null): number {
     return clampMs(dateMs - Date.now())
   }
 
-  return RETRY_FALLBACK_MS
+  return jitteredFallbackMs()
 }
 
 function delay(ms: number): Promise<void> {
@@ -77,6 +91,7 @@ export async function tmdbFetch<T>(path: string, options: TmdbFetchOptions = {})
   let response = await fetch(url.toString(), init)
 
   for (let attempt = 1; response.status === 429 && attempt < MAX_FETCH_ATTEMPTS; attempt++) {
+    await response.body?.cancel()
     await delay(retryDelayMs(response.headers.get('retry-after')))
     response = await fetch(url.toString(), init)
   }
