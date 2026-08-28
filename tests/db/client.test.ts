@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveDriver } from '@/db/client'
+import { resolveDriver } from '@/server/db/client'
 
 describe('resolveDriver', () => {
   it('honours an explicit DB_DRIVER over runtime inference', () => {

@@ -10,7 +10,7 @@ import type {
   TrendingItem,
   TvDetail,
   TvListItem,
-} from '@/lib/tmdb/types'
+} from '@/server/tmdb/types'
 
 const load = (name: string) =>
   JSON.parse(readFileSync(`tests/fixtures/tmdb/${name}.json`, 'utf8'))

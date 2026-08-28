@@ -3,6 +3,13 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq is required but not installed." >&2
+  echo "  macOS: brew install jq" >&2
+  echo "  Linux: apt-get install jq (or your distro's equivalent)" >&2
+  exit 1
+fi
+
 set -a; . ./.env.local; set +a
 OUT=tests/fixtures/tmdb
 mkdir -p "$OUT"
