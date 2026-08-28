@@ -146,9 +146,12 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 
 describe('scaffold', () => {
-  it('builds a standalone server bundle', () => {
-    const config = readFileSync('next.config.ts', 'utf8')
-    expect(config).toContain("output: 'standalone'")
+  it('configures standalone output and the TMDB image host', async () => {
+    const { default: config } = await import('../next.config')
+    expect(config.output).toBe('standalone')
+    expect(config.images?.remotePatterns).toContainEqual(
+      expect.objectContaining({ hostname: 'image.tmdb.org' }),
+    )
   })
 
   it('keeps env files out of git', () => {
@@ -156,6 +159,8 @@ describe('scaffold', () => {
   })
 })
 ```
+
+The first test imports the config and asserts on parsed values rather than grepping the source text, so it cannot pass on a commented-out line or fail on a requote. The second deliberately does assert on file text: for `.gitignore` the text *is* the behaviour, and it guards a real regression.
 
 - [ ] **Step 8: Run the test**
 
