@@ -15,41 +15,96 @@ import type {
 const load = (name: string) =>
   JSON.parse(readFileSync(`tests/fixtures/tmdb/${name}.json`, 'utf8'))
 
-const MOVIE_LIST_ITEM_KEYS = [
-  'adult',
-  'backdrop_path',
-  'genre_ids',
-  'id',
-  'original_language',
-  'original_title',
-  'overview',
-  'popularity',
-  'poster_path',
-  'release_date',
-  'softcore',
-  'title',
-  'video',
-  'vote_average',
-  'vote_count',
-]
+const declaredKeys = <T>(declared: Record<keyof T, true>): string[] =>
+  Object.keys(declared).sort()
 
-const TV_LIST_ITEM_KEYS = [
-  'adult',
-  'backdrop_path',
-  'first_air_date',
-  'genre_ids',
-  'id',
-  'name',
-  'origin_country',
-  'original_language',
-  'original_name',
-  'overview',
-  'popularity',
-  'poster_path',
-  'softcore',
-  'vote_average',
-  'vote_count',
-]
+const MOVIE_LIST_ITEM_KEYS = declaredKeys<MovieListItem>({
+  adult: true,
+  backdrop_path: true,
+  genre_ids: true,
+  id: true,
+  original_language: true,
+  original_title: true,
+  overview: true,
+  popularity: true,
+  poster_path: true,
+  release_date: true,
+  softcore: true,
+  title: true,
+  video: true,
+  vote_average: true,
+  vote_count: true,
+})
+
+const TV_LIST_ITEM_KEYS = declaredKeys<TvListItem>({
+  adult: true,
+  backdrop_path: true,
+  first_air_date: true,
+  genre_ids: true,
+  id: true,
+  name: true,
+  origin_country: true,
+  original_language: true,
+  original_name: true,
+  overview: true,
+  popularity: true,
+  poster_path: true,
+  softcore: true,
+  vote_average: true,
+  vote_count: true,
+})
+
+const MOVIE_DETAIL_KEYS = declaredKeys<MovieDetail>({
+  adult: true,
+  backdrop_path: true,
+  genres: true,
+  homepage: true,
+  id: true,
+  imdb_id: true,
+  origin_country: true,
+  original_language: true,
+  original_title: true,
+  overview: true,
+  popularity: true,
+  poster_path: true,
+  release_date: true,
+  runtime: true,
+  softcore: true,
+  status: true,
+  tagline: true,
+  title: true,
+  video: true,
+  vote_average: true,
+  vote_count: true,
+})
+
+const TV_DETAIL_KEYS = declaredKeys<TvDetail>({
+  adult: true,
+  backdrop_path: true,
+  episode_run_time: true,
+  first_air_date: true,
+  genres: true,
+  homepage: true,
+  id: true,
+  in_production: true,
+  languages: true,
+  last_air_date: true,
+  name: true,
+  number_of_episodes: true,
+  number_of_seasons: true,
+  origin_country: true,
+  original_language: true,
+  original_name: true,
+  overview: true,
+  popularity: true,
+  poster_path: true,
+  softcore: true,
+  status: true,
+  tagline: true,
+  type: true,
+  vote_average: true,
+  vote_count: true,
+})
 
 const keysOf = (value: unknown) => Object.keys(value as object).sort()
 
@@ -87,7 +142,7 @@ describe('captured TMDB payloads', () => {
     for (const fixture of ['now-playing', 'top-rated', 'discover-movie']) {
       const page = load(fixture) as PagedResponse<MovieListItem>
       for (const item of page.results) {
-        expect(keysOf(item), fixture).toEqual([...MOVIE_LIST_ITEM_KEYS].sort())
+        expect(keysOf(item), fixture).toEqual(MOVIE_LIST_ITEM_KEYS)
       }
     }
   })
@@ -95,7 +150,7 @@ describe('captured TMDB payloads', () => {
   it('TvListItem declares exactly the keys the tv list endpoints return', () => {
     const page = load('airing-today') as PagedResponse<TvListItem>
     for (const item of page.results) {
-      expect(keysOf(item)).toEqual([...TV_LIST_ITEM_KEYS].sort())
+      expect(keysOf(item)).toEqual(TV_LIST_ITEM_KEYS)
     }
   })
 
@@ -189,60 +244,12 @@ describe('captured TMDB payloads', () => {
 
   it('every declared detail field is present in the captured detail payloads', () => {
     const movie = load('movie-detail')
-    for (const key of [
-      'adult',
-      'backdrop_path',
-      'genres',
-      'homepage',
-      'id',
-      'imdb_id',
-      'origin_country',
-      'original_language',
-      'original_title',
-      'overview',
-      'popularity',
-      'poster_path',
-      'release_date',
-      'runtime',
-      'softcore',
-      'status',
-      'tagline',
-      'title',
-      'video',
-      'vote_average',
-      'vote_count',
-    ]) {
+    for (const key of MOVIE_DETAIL_KEYS) {
       expect(movie, `movie-detail.${key}`).toHaveProperty(key)
     }
 
     const tv = load('tv-detail')
-    for (const key of [
-      'adult',
-      'backdrop_path',
-      'episode_run_time',
-      'first_air_date',
-      'genres',
-      'homepage',
-      'id',
-      'in_production',
-      'languages',
-      'last_air_date',
-      'name',
-      'number_of_episodes',
-      'number_of_seasons',
-      'origin_country',
-      'original_language',
-      'original_name',
-      'overview',
-      'popularity',
-      'poster_path',
-      'softcore',
-      'status',
-      'tagline',
-      'type',
-      'vote_average',
-      'vote_count',
-    ]) {
+    for (const key of TV_DETAIL_KEYS) {
       expect(tv, `tv-detail.${key}`).toHaveProperty(key)
     }
   })
