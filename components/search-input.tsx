@@ -1,50 +1,41 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { initialSearchInputState, syncFromUrl, typed, type SearchInputState } from '@/lib/search-input-state'
 
 export function SearchInput() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const urlQuery = searchParams.get('q') ?? ''
-  const [value, setValue] = useState(urlQuery)
-  // Tracks the query we last put in the URL ourselves, so we can tell "the
-  // URL changed because our own debounced push landed" apart from "the URL
-  // changed underneath us" (header-link click, back/forward). Only the
-  // latter should overwrite what the user is typing.
-  const lastSynced = useRef(urlQuery)
-  const skipNextDebounce = useRef(true)
+  const [state, setState] = useState<SearchInputState>(() => initialSearchInputState(urlQuery))
+  const [syncedQuery, setSyncedQuery] = useState(urlQuery)
+
+  // A URL change we didn't cause resyncs the box; one we did cause is
+  // ignored until it lands, so a late commit can't clobber newer typing.
+  if (urlQuery !== syncedQuery) {
+    setSyncedQuery(urlQuery)
+    setState((current) => syncFromUrl(current, urlQuery))
+  }
 
   useEffect(() => {
-    if (urlQuery !== lastSynced.current) {
-      lastSynced.current = urlQuery
-      skipNextDebounce.current = true
-      setValue(urlQuery)
-    }
-  }, [urlQuery])
-
-  useEffect(() => {
-    if (skipNextDebounce.current) {
-      skipNextDebounce.current = false
-      return
-    }
+    if (state.pending === null) return
+    const pending = state.pending
     const timer = setTimeout(() => {
-      const trimmed = value.trim()
-      lastSynced.current = trimmed
       const params = new URLSearchParams()
-      if (trimmed) params.set('q', trimmed)
+      if (pending) params.set('q', pending)
       router.replace(params.toString() ? `/search?${params}` : '/search')
     }, 300)
     return () => clearTimeout(timer)
-  }, [value, router])
+  }, [state.pending, router])
 
   return (
     <label className="mx-auto mt-8 block max-w-2xl px-6">
       <span className="mb-2 block text-sm text-[var(--muted)]">Search movies and TV</span>
       <input
         type="search"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        value={state.value}
+        onChange={(event) => setState(typed(urlQuery, event.target.value))}
         placeholder="Search for a title"
         autoComplete="off"
         className="w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-lg outline-none focus-visible:border-white/50"
