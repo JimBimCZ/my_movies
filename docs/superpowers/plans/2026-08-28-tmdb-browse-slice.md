@@ -1067,7 +1067,7 @@ git push origin main
 
 **Interfaces:**
 - Consumes: `DATABASE_URL`, `DB_DRIVER`, `VERCEL`.
-- Produces: `db` from `@/db/client`, and `resolveDriver(env): 'neon-http' | 'node-postgres'` exported from the same module for testing.
+- Produces: `getDb()` from `@/db/client`, and `resolveDriver(env): 'neon-http' | 'node-postgres'` exported from the same module for testing.
 
 - [ ] **Step 1: Write the failing driver-selection tests**
 
@@ -1153,32 +1153,12 @@ function createDb(): NodePgDatabase<typeof schema> {
 let instance: NodePgDatabase<typeof schema> | undefined
 
 // next build evaluates route modules during page-data collection — reading `export const
-// dynamic` is itself what forces evaluation — so eager construction fails any build without
-// DATABASE_URL, including the Docker build stage. Deferring to first access keeps the
-// branch-once contract; resolveDriver staying unit-testable is a side effect, not the reason.
-function load(): NodePgDatabase<typeof schema> {
+// dynamic` is itself what forces evaluation — so constructing at module load fails any build
+// without DATABASE_URL, including the Docker build stage.
+export function getDb(): NodePgDatabase<typeof schema> {
   instance ??= createDb()
   return instance
 }
-
-export const db: NodePgDatabase<typeof schema> = new Proxy({} as NodePgDatabase<typeof schema>, {
-  get(_target, prop) {
-    const value = load()[prop as keyof NodePgDatabase<typeof schema>]
-    return typeof value === 'function' ? value.bind(load()) : value
-  },
-  has: (_t, prop) => Reflect.has(load(), prop),
-  ownKeys: () => Reflect.ownKeys(load()),
-  getOwnPropertyDescriptor: (_t, prop) => {
-    const descriptor = Reflect.getOwnPropertyDescriptor(load(), prop)
-    if (descriptor && typeof descriptor.value === 'function') {
-      descriptor.value = descriptor.value.bind(load())
-    }
-    return descriptor
-  },
-  set: (_t, prop, value) => Reflect.set(load(), prop, value),
-  defineProperty: (_t, prop, descriptor) => Reflect.defineProperty(load(), prop, descriptor),
-  deleteProperty: (_t, prop) => Reflect.deleteProperty(load(), prop),
-})
 ```
 
 - [ ] **Step 5: Run the tests**
@@ -1201,16 +1181,13 @@ export default defineConfig({
 
 Do not run `db:generate` in this slice. There is no schema to migrate.
 
-**The proxy needs write traps, not just read traps.** `has`, `ownKeys` and
-`getOwnPropertyDescriptor` alone are actively worse than `get` alone. `[[Set]]` has no trap,
-so an assignment runs `OrdinarySet` against the empty target; it consults the new
-`getOwnPropertyDescriptor` trap, finds a writable descriptor, and calls `[[DefineOwnProperty]]`
-with a partial `{value}` descriptor. With no `defineProperty` trap the target fills the rest
-with the spec defaults `writable: false, configurable: false` — after which every read of that
-property throws `TypeError: 'get' on proxy: property ... is a read-only and non-configurable
-data property`, and so does `Object.keys(db)`. `db` is a module-level singleton, so one stray
-assignment bricks it for the life of the process. Verified by probe. Either trap the write
-paths too, or trap nothing but `get`; the half-way shape is the one that breaks.
+**Export `getDb()`, not a `db` proxy.** A lazy `Proxy` was tried and abandoned after three
+review rounds each surfaced a new permanent-poisoning case: read traps alone made a benign
+swallowed write throw on every later read; `Object.defineProperty` with `configurable: false`
+half-applies to the instance and then poisons `ownKeys` for the process lifetime; and
+`Object.freeze(db)` breaks `ownKeys` the same way. Each was individually unreachable, and each
+was a landmine for slice 2's repositories and Auth.js adapter. A function call has none of that
+surface.
 
 **`db` must be lazy.** Verified empirically: with eager `export const db = createDb()` and no
 `DATABASE_URL`, `next build` exits 1 with `Failed to collect page data for /api/health` —
@@ -1226,13 +1203,13 @@ imports `db` directly.
 
 ```ts
 import { sql } from 'drizzle-orm'
-import { db } from '@/db/client'
+import { getDb } from '@/db/client'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    await db.execute(sql`select 1`)
+    await getDb().execute(sql`select 1`)
     return Response.json({ status: 'ok' })
   } catch {
     return Response.json({ status: 'error', database: 'unreachable' }, { status: 503 })

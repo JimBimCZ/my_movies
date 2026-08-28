@@ -1,11 +1,11 @@
 import { sql } from 'drizzle-orm'
-import { db } from '@/db/client'
+import { getDb } from '@/db/client'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    await db.execute(sql`select 1`)
+    await getDb().execute(sql`select 1`)
     return Response.json({ status: 'ok' })
   } catch {
     // Discarded deliberately: this route is unauthenticated, and a connection error's message

@@ -165,7 +165,8 @@ itself is checked rather than remembered.
 
 ## Data layer
 
-`db/client.ts` selects the driver once and exports a single Drizzle instance.
+`db/client.ts` selects the driver once and exposes it through `getDb()`, which builds the
+instance on first call and memoises it.
 Nothing above this file knows which driver is in use, and query code takes and
 returns no driver-specific types.
 
@@ -174,10 +175,13 @@ The branch reads an explicit `DB_DRIVER` environment variable accepting
 `process.env.VERCEL` is present and `node-postgres` otherwise. An explicit
 variable rather than inference alone means the container can be pointed at Neon,
 and a Vercel preview at a plain Postgres, without a code change — and it makes
-the selection greppable instead of implicit. The branch is evaluated once, on first
-access rather than at module load, and memoised — never per call. Laziness is not a style
-choice: `next build` evaluates route modules while collecting page data, so a `db` built at
-import time fails any build without `DATABASE_URL`, including the container image build.
+the selection greppable instead of implicit. The branch is evaluated once, on the first
+`getDb()` call rather than at module load, and memoised — never per call. Laziness is not a
+style choice: `next build` evaluates route modules while collecting page data, so an instance
+built at import time fails any build without `DATABASE_URL`, including the container image
+build. An accessor is used rather than a lazy proxy: a proxy over a Drizzle instance needs
+every trap to stay consistent, and a missing one poisons the shared singleton for the life of
+the process.
 
 `drizzle.config.ts` and `db/schema.ts` are created in this slice. `schema.ts`
 starts with no table definitions: it exists so that `db/client.ts` can be typed
