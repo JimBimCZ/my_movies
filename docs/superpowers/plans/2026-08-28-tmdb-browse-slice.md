@@ -930,28 +930,28 @@ export async function getTrending(): Promise<TrendingItem[]> {
   )
 }
 
-export async function getNowPlaying(): Promise<MovieListItem[]> {
+export async function getNowPlaying(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/movie/now_playing', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('now-playing')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 
-export async function getTopRated(): Promise<MovieListItem[]> {
+export async function getTopRated(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/movie/top_rated', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('top-rated')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 
-export async function getAiringToday(): Promise<TvListItem[]> {
+export async function getAiringToday(): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<TvListItem>>('/tv/airing_today', {
     revalidate: REVALIDATE.list,
     tags: [tags.list('airing-today')],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'tv' as const }))
 }
 
 export async function getMovieGenres(): Promise<Genre[]> {
@@ -962,13 +962,13 @@ export async function getMovieGenres(): Promise<Genre[]> {
   return response.genres
 }
 
-export async function discoverByGenre(genreId: number): Promise<MovieListItem[]> {
+export async function discoverByGenre(genreId: number): Promise<TrendingItem[]> {
   const page = await tmdbFetch<PagedResponse<MovieListItem>>('/discover/movie', {
     searchParams: { with_genres: genreId, sort_by: 'popularity.desc' },
     revalidate: REVALIDATE.list,
     tags: [tags.list(`genre-${genreId}`)],
   })
-  return page.results
+  return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
 ```
 
@@ -995,8 +995,13 @@ export function getTvDetail(id: number): Promise<TvDetail> {
   })
 }
 
-export function getTitleDetail(mediaType: MediaType, id: number): Promise<MovieDetail | TvDetail> {
-  return mediaType === 'movie' ? getMovieDetail(id) : getTvDetail(id)
+export type TitleDetail =
+  | (MovieDetail & { media_type: 'movie' })
+  | (TvDetail & { media_type: 'tv' })
+
+export async function getTitleDetail(mediaType: MediaType, id: number): Promise<TitleDetail> {
+  const detail = mediaType === 'movie' ? await getMovieDetail(id) : await getTvDetail(id)
+  return { ...detail, media_type: mediaType } as TitleDetail
 }
 ```
 
@@ -1392,7 +1397,7 @@ git push origin main
 
 **Interfaces:**
 - Consumes: `buildImageUrl`, `pickSize`, `POSTER_SLOTS`, `getImageConfig` (Task 4); types (Task 2).
-- Produces: `toCardItem(item: TrendingItem | MovieListItem | TvListItem, fallbackMediaType: MediaType): CardItem` from `@/lib/media`, where `CardItem = { id: number; title: string; posterPath: string | null; mediaType: MediaType }`; `<PosterCard />`, `<Row />`, `<RowSkeleton />`.
+- Produces: `toCardItem(item: TrendingItem): CardItem` from `@/lib/media`, where `CardItem = { id: number; title: string; posterPath: string | null; mediaType: MediaType }`; `<PosterCard />`, `<Row />`, `<RowSkeleton />`.
 
 `toCardItem` is the single place the `title` / `name` divergence between movie and TV payloads is resolved. Every row and search result goes through it.
 
@@ -1450,18 +1455,12 @@ export interface CardItem {
   mediaType: MediaType
 }
 
-type AnyListItem = (TrendingItem | MovieListItem | TvListItem) & {
-  title?: string
-  name?: string
-  media_type?: MediaType
-}
-
-export function toCardItem(item: AnyListItem, fallbackMediaType: MediaType): CardItem {
+export function toCardItem(item: TrendingItem): CardItem {
   return {
     id: item.id,
-    title: item.title ?? item.name ?? 'Untitled',
+    title: item.media_type === 'movie' ? item.title : item.name,
     posterPath: item.poster_path,
-    mediaType: item.media_type ?? fallbackMediaType,
+    mediaType: item.media_type,
   }
 }
 ```
@@ -1672,7 +1671,7 @@ import { toCardItem } from '@/lib/media'
 
 export async function Hero({ item }: { item: TrendingItem }) {
   const images = await getImageConfig()
-  const card = toCardItem(item, 'movie')
+  const card = toCardItem(item)
   const backdrop = buildImageUrl(
     images.secure_base_url,
     pickSize(images.backdrop_sizes, BACKDROP_SLOTS.hero),
@@ -1723,27 +1722,27 @@ import {
 
 async function TrendingRow() {
   const items = await getTrending()
-  return <Row title="Trending this week" items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title="Trending this week" items={items.map((item) => toCardItem(item))} />
 }
 
 async function NowPlayingRow() {
   const items = await getNowPlaying()
-  return <Row title="Now playing" items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title="Now playing" items={items.map((item) => toCardItem(item))} />
 }
 
 async function TopRatedRow() {
   const items = await getTopRated()
-  return <Row title="Top rated" items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title="Top rated" items={items.map((item) => toCardItem(item))} />
 }
 
 async function AiringTodayRow() {
   const items = await getAiringToday()
-  return <Row title="Airing today" items={items.map((item) => toCardItem(item, 'tv'))} />
+  return <Row title="Airing today" items={items.map((item) => toCardItem(item))} />
 }
 
 async function GenreRow({ id, name }: { id: number; name: string }) {
   const items = await discoverByGenre(id)
-  return <Row title={name} items={items.map((item) => toCardItem(item, 'movie'))} />
+  return <Row title={name} items={items.map((item) => toCardItem(item))} />
 }
 
 async function GenreRows() {
@@ -1913,8 +1912,9 @@ export default async function TitlePage({
   })
 
   const images = await getImageConfig()
-  const title = 'title' in detail ? detail.title : detail.name
-  const released = 'release_date' in detail ? detail.release_date : detail.first_air_date
+  const title = detail.media_type === 'movie' ? detail.title : detail.name
+  const released =
+    detail.media_type === 'movie' ? detail.release_date : detail.first_air_date
   const poster = buildImageUrl(
     images.secure_base_url,
     pickSize(images.poster_sizes, POSTER_SLOTS.detail),
@@ -2102,7 +2102,7 @@ async function Results({ query }: { query: string }) {
       {items.map((item) => (
         <li key={`${item.media_type}-${item.id}`}>
           <PosterCard
-            item={toCardItem(item, item.media_type)}
+            item={toCardItem(item)}
             imageBase={images.secure_base_url}
             posterSizes={images.poster_sizes}
             variant="grid"
