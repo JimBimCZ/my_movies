@@ -14,7 +14,7 @@ export function SiteFooter() {
         </div>
         <Link
           href="/privacy"
-          className="rounded shrink-0 hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+          className="rounded shrink-0 py-1 hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
         >
           Privacy Policy
         </Link>

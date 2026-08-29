@@ -11,13 +11,13 @@ export async function SiteHeader() {
         <Link href="/" className="text-lg font-semibold tracking-tight">
           My Movies
         </Link>
-        <Link href="/search" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
+        <Link href="/search" className="py-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
           Search
         </Link>
         {session ? (
           <Link
             href="/watchlist"
-            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+            className="py-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
           >
             Watchlist
           </Link>
@@ -29,7 +29,7 @@ export async function SiteHeader() {
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="rounded text-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                  className="rounded py-1 text-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 >
                   Sign out
                 </button>
@@ -38,7 +38,7 @@ export async function SiteHeader() {
           ) : (
             <Link
               href="/signin"
-              className="rounded text-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+              className="rounded py-1 text-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
               Sign in
             </Link>

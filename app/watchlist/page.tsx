@@ -48,6 +48,7 @@ export default async function WatchlistPage() {
                 inWatchlist
                 signedIn
                 returnTo="/watchlist"
+                title={item.title}
               />
             </li>
           ))}

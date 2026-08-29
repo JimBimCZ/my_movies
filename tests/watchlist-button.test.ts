@@ -27,4 +27,12 @@ describe('watchlist button', () => {
   it('links to sign-in instead of toggling when signed out', () => {
     expect(source()).toContain('/signin?callbackUrl=')
   })
+
+  it('appends the title so several remove buttons on one page are distinguishable', () => {
+    const code = source()
+    expect(code).toMatch(/<span className="sr-only"> — \{title\}<\/span>/)
+    // Appended, not substituted: the visible words must survive in the accessible name
+    // or speech input stops matching the control (WCAG 2.5.3).
+    expect(code).not.toContain('aria-label')
+  })
 })

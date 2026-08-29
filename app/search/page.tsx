@@ -25,7 +25,12 @@ async function Results({ query }: { query: string }) {
       <p className="sr-only">
         {items.length} result{items.length === 1 ? '' : 's'} for {query}.
       </p>
-      <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 py-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
+      {/* The list sits inside the live region but must not be read out of it: without this
+          every debounced keystroke announces the summary and then all twenty titles. */}
+      <ul
+        aria-live="off"
+        className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 py-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6"
+      >
         {items.map((item) => (
           <li key={`${item.media_type}-${item.id}`}>
             <PosterCard
