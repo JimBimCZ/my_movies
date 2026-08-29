@@ -179,11 +179,10 @@ Verified by running it, against a real TMDB token and a real Postgres:
 - `node-postgres` now writes. A title added through the running container's own UI comes back from the compose Postgres by joining `users` to `watchlist_items` — the first row this project has written through the application rather than through a test.
 - The toggle is genuinely optimistic and genuinely rolls back. Measured in a browser: the label flips 24ms after the click against an 87ms server round trip; with Postgres stopped it flips at 6.2ms and reverts at 47.4ms, leaving an explanation in a `role="status"` region instead of replacing the page with an error boundary.
 - The built image carries no `.env` file and no build-stage `node_modules`, and no copy of any of the six secrets in `.env.local` — each value was searched for inside the image, with a positive control to prove the search was live.
+- **Both providers complete a real sign-in, and `neon-http` writes.** On the live Vercel deployment, GitHub and Google each completed an OAuth round trip and created an `accounts` row, and two titles added from the site persist in Neon. That closes the gap this project carried from the start: both driver branches have now executed an insert, not just opened a connection.
 
 Still unverified:
 
-- **A real OAuth sign-in.** Every signed-in check above presented a session row seeded straight into the `sessions` table as the ordinary session cookie. That exercises `auth()`, the Drizzle adapter and the database session strategy against a real Postgres, but not the GitHub or Google authorization round trip.
-- **The `neon-http` write path.** The migration *is* applied to Neon — all four tables exist, and drizzle's journal records entry `id=1` at 2026-08-29 10:59 UTC — but every table is empty and nothing has been written from Vercel, so that driver has still only ever read.
 - **Preview deployments.** Sign-in cannot complete on a preview URL by design: neither provider will redirect to a per-deployment host. See [docs/oauth-setup.md](docs/oauth-setup.md).
 - Error boundaries and cache-tag revalidation, as above.
 
