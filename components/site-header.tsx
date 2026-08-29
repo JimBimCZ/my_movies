@@ -6,18 +6,21 @@ export async function SiteHeader() {
   const session = await auth()
 
   return (
-    <header className="sticky top-0 z-20 bg-gradient-to-b from-black/80 to-transparent px-6 py-4">
+    <header className="sticky top-0 z-20 bg-gradient-to-b from-black/90 via-black/60 to-transparent px-6 pb-8 pt-4">
       <nav className="mx-auto flex max-w-7xl items-center gap-6">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           My Movies
         </Link>
-        <Link href="/search" className="py-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
+        <Link
+          href="/search"
+          className="py-1 text-sm text-white/90 hover:text-white"
+        >
           Search
         </Link>
         {session ? (
           <Link
             href="/watchlist"
-            className="py-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+            className="py-1 text-sm text-white/90 hover:text-white"
           >
             Watchlist
           </Link>
@@ -25,11 +28,13 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-4 text-sm">
           {session ? (
             <>
-              <span className="text-[var(--muted)]">{session.user?.name ?? session.user?.email}</span>
+              <span className="text-white/70">
+                {session.user?.name ?? session.user?.email}
+              </span>
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="rounded py-1 text-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                  className="rounded py-1 text-white/90 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 >
                   Sign out
                 </button>
@@ -38,7 +43,7 @@ export async function SiteHeader() {
           ) : (
             <Link
               href="/signin"
-              className="rounded py-1 text-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+              className="rounded py-1 text-white/90 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
               Sign in
             </Link>
