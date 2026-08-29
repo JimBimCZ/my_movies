@@ -90,3 +90,35 @@ describe('cast row', () => {
     expect(castRow()).toMatch(/cast\.length === 0/)
   })
 })
+
+const carousel = () => readFileSync('components/backdrop-carousel.tsx', 'utf8')
+
+describe('backdrop carousel', () => {
+  it('is a server component reusing the shared scroller', () => {
+    const code = carousel()
+    expect(code).not.toMatch(/["']use client["']/)
+    expect(code).toContain('RowScroller')
+  })
+
+  it('renders nothing when the title has no extra images', () => {
+    expect(carousel()).toMatch(/images\.length === 0/)
+  })
+
+  it('lazily loads the stills, which are all below the fold', () => {
+    expect(carousel()).toContain("loading=\"lazy\"")
+  })
+
+  it('marks the stills decorative rather than inventing alt text per frame', () => {
+    // A still has no caption in the payload; an invented one is worse than none,
+    // and the section heading already names the title.
+    expect(carousel()).toMatch(/alt=""/)
+  })
+})
+
+describe('title detail page images section', () => {
+  it('caps how many stills it asks for', () => {
+    const code = page()
+    expect(code).toContain('BACKDROP_LIMIT')
+    expect(code).toContain('pickBackdrops(detail.images, BACKDROP_LIMIT)')
+  })
+})
