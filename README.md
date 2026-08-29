@@ -62,6 +62,32 @@ The driver is chosen once, in `server/db/client.ts`: the Neon serverless driver 
 
 There are no tables yet — `server/db/schema.ts` is deliberately empty. Users, sessions and the watchlist arrive with authentication.
 
+Migrations are never run on container start — concurrent containers would race — so they stay a separate step against `DATABASE_URL_UNPOOLED`:
+
+```bash
+pnpm db:migrate
+```
+
+## Docker
+
+The image is one self-contained artifact: an env file and a reachable Postgres are enough to get a working instance. No sidecar, no build step at container start, no reverse proxy. Nothing is baked in — no token, no database URL, no `.env`.
+
+```bash
+docker build -t movies-app .
+docker run --rm -p 3000:3000 --env-file .env.local movies-app
+```
+
+It runs as the `node` user, respects `PORT` and `HOSTNAME` (defaults `3000` and `0.0.0.0`), and carries a `HEALTHCHECK` that hits `/api/health` — so a container whose database has gone away reports `unhealthy` rather than merely "up".
+
+For local work, `docker-compose.yml` brings up the app together with a Postgres 17. It is a convenience, not the deployment unit:
+
+```bash
+set -a; . ./.env.local; set +a   # compose reads TMDB_ACCESS_TOKEN from the environment
+docker compose up -d --build
+```
+
+Compose fails fast when `TMDB_ACCESS_TOKEN` is unset rather than serving an empty catalogue that looks fine. That guard also blocks `ps`, `logs`, `stop` and `down`, so any placeholder unblocks teardown if you no longer have the value at hand: `TMDB_ACCESS_TOKEN=x docker compose down -v`.
+
 ## Commands
 
 ```bash
@@ -118,8 +144,19 @@ The TMDB client also respects a `429` with a bounded, jittered retry that honour
 ## Not built yet
 
 - **Sign-in and the watchlist.** No authentication, no `watchlist_items` table.
-- **Docker.** There is no `Dockerfile` or `docker-compose.yml` in the repo yet; deploying to a container is the next piece of work.
 - **Error boundaries.** A TMDB failure currently reaches Next's default error page.
+- **Cache-tag revalidation and CI.** Responses carry cache tags, but nothing revalidates them yet, and there is no pipeline running the gate on push.
+
+## What is verified, and what is not
+
+Verified by running it, against a real TMDB token and a real Postgres:
+
+- `/`, `/title/movie/:id`, `/title/tv/:id` and `/search?q=` render live TMDB data; a malformed id returns a real 404.
+- `/api/health` returns `200` against a reachable database and `503` when it is not.
+- The image builds, and the container serves those routes. Stopping Postgres under a running container flips it to `unhealthy` and the route to `503`; starting Postgres again returns it to `healthy`.
+- The built image carries no `.env` file, no build-stage `node_modules`, and no copy of the TMDB token.
+
+**Not verified: the `neon-http` branch of `server/db/client.ts`.** No Neon `DATABASE_URL` existed while this was written, so only the `node-postgres` branch has ever opened a connection. Confirming Neon over HTTP is the first task of the deploy step.
 
 ## Attribution
 
