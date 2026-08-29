@@ -19,3 +19,19 @@ export const tags = {
   detail: (mediaType: MediaType, id: number) => `tmdb:title:${mediaType}:${id}`,
   search: 'tmdb:search',
 } as const
+
+const FIXED_TAGS: ReadonlySet<string> = new Set([
+  tags.configuration,
+  tags.genres,
+  tags.trending,
+  tags.search,
+])
+const LIST_TAG = /^tmdb:list:(?:now-playing|top-rated|airing-today|genre-\d+)$/
+const DETAIL_TAG = /^tmdb:title:(?:movie|tv):\d+$/
+
+// Mirrors the builders above, and must keep mirroring them. Revalidation is reachable over
+// HTTP, and revalidateTag on a caller-chosen string would let one request purge anything and
+// force an unbounded refetch against TMDB's rate limit.
+export function isKnownTag(tag: string): boolean {
+  return FIXED_TAGS.has(tag) || LIST_TAG.test(tag) || DETAIL_TAG.test(tag)
+}

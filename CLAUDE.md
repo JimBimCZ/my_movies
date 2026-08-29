@@ -105,7 +105,8 @@ docker run --rm -p 3000:3000 --env-file .env.local movies-app
 - Check current rate-limit and caching guidance in TMDB's docs before designing anything that fans out into many requests. Do not assume a specific limit.
 - TMDB's terms require attribution. Section 3 of https://www.themoviedb.org/documentation/api/terms-of-use specifies the wording, verified 2026-08-28: "This [website, program, service, application, product] uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB." The footer carries that sentence with `application` chosen from the bracket, plus the TMDB logo. Re-read the terms before changing it — this is a quote, not a paraphrase, and earlier drafts of this file paraphrased it as "not endorsed or certified", which is not what TMDB requires.
 - The same section requires that TMDB's logo be "less prominent than the logos or marks that primarily describe or identify Your Application". The TMDB mark therefore stays in the footer, below the "My Movies" wordmark in the header; do not promote it into the header or scale it past the wordmark.
-- Cache aggressively. Catalogue data changes slowly; use Next's fetch cache with sensible revalidation and cache tags per endpoint family.
+- Cache aggressively. Catalogue data changes slowly; use Next's fetch cache with sensible revalidation and cache tags per endpoint family. `server/tmdb/cache.ts` holds both policies; every endpoint wrapper passes them to `tmdbFetch`.
+- `POST /api/revalidate` purges one tag on demand, authenticated with `REVALIDATE_SECRET`. It accepts only tags `isKnownTag` recognises — extend that validator alongside any new tag builder, or the new family cannot be purged.
 
 ## Data layer
 
@@ -156,6 +157,7 @@ AUTH_GITHUB_ID
 AUTH_GITHUB_SECRET
 AUTH_GOOGLE_ID
 AUTH_GOOGLE_SECRET
+REVALIDATE_SECRET       # shared secret for POST /api/revalidate; unset disables the route
 PORT / HOSTNAME         # container only, defaults 3000 / 0.0.0.0
 ```
 
