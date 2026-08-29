@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: movies
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:devpass@db:5432/movies
+      DB_DRIVER: node-postgres
+      # ${VAR:?err} fails fast instead of silently sending an empty token: without it,
+      # `up` serves 200s with an empty catalogue — nothing looks broken. Export it first,
+      # e.g. `set -a; . ./.env.local; set +a`. This also blocks ps/stop/down/logs (`logs`
+      # included — the command you'd reach for first); any placeholder unblocks teardown:
+      # `TMDB_ACCESS_TOKEN=x docker compose down -v`.
+      TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:?set TMDB_ACCESS_TOKEN before running compose, e.g. set -a; . ./.env.local; set +a}
+      AUTH_URL: http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
