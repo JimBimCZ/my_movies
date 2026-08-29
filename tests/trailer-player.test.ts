@@ -29,6 +29,14 @@ describe('trailer player', () => {
     expect(code).toMatch(/title=\{`\$\{title\} trailer`\}/)
     expect(code).toMatch(/Play trailer/)
   })
+
+  it('moves focus to the iframe once it mounts, so activating play does not drop it', () => {
+    const code = player()
+    expect(code).toMatch(/useEffect\(\(\) => \{\s*if \(playing\) iframeRef\.current\?\.focus\(\)/)
+    expect(code).toMatch(/\}, \[playing\]\)/)
+    expect(code).toContain('ref={iframeRef}')
+    expect(code).toContain('tabIndex={-1}')
+  })
 })
 
 describe('title detail page trailer section', () => {

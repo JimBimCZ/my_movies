@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export function TrailerPlayer({
   youtubeKey,
@@ -13,11 +13,18 @@ export function TrailerPlayer({
   thumbnail: string | null
 }) {
   const [playing, setPlaying] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => {
+    if (playing) iframeRef.current?.focus()
+  }, [playing])
 
   return (
     <div className="relative aspect-video w-full overflow-hidden rounded-md bg-white/5">
       {playing ? (
         <iframe
+          ref={iframeRef}
+          tabIndex={-1}
           src={`https://www.youtube-nocookie.com/embed/${youtubeKey}?autoplay=1`}
           title={`${title} trailer`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

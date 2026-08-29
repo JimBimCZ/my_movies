@@ -59,6 +59,11 @@ describe('toTitleFacts', () => {
     expect(facts).toContainEqual({ label: 'Runtime', value: '2h 28m' })
   })
 
+  it('groups the vote count with thousands separators', () => {
+    const facts = toTitleFacts(movie())
+    expect(facts).toContainEqual({ label: 'Rating', value: '8.4 / 10 · 40,017 votes' })
+  })
+
   it('names the creator for tv, where the crew has no Director', () => {
     const facts = toTitleFacts(tv())
     expect(facts).toContainEqual({ label: 'Creator', value: 'Vince Gilligan' })

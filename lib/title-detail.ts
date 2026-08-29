@@ -29,7 +29,7 @@ function formatDate(iso: string): string {
 }
 
 function plural(count: number, noun: string): string {
-  return `${count} ${noun}${count === 1 ? '' : 's'}`
+  return `${count.toLocaleString('en-US')} ${noun}${count === 1 ? '' : 's'}`
 }
 
 export function toTitleFacts(detail: TitleDetail): TitleFact[] {

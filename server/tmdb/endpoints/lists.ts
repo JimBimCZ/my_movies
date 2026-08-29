@@ -52,3 +52,20 @@ export async function discoverByGenre(genreId: number): Promise<TrendingItem[]> 
   })
   return page.results.map((item) => ({ ...item, media_type: 'movie' as const }))
 }
+
+export async function getTvGenres(): Promise<Genre[]> {
+  const response = await tmdbFetch<{ genres: Genre[] }>('/genre/tv/list', {
+    revalidate: REVALIDATE.genres,
+    tags: [tags.genres],
+  })
+  return response.genres
+}
+
+export async function discoverTvByGenre(genreId: number): Promise<TrendingItem[]> {
+  const page = await tmdbFetch<PagedResponse<TvListItem>>('/discover/tv', {
+    searchParams: { with_genres: genreId, sort_by: 'popularity.desc' },
+    revalidate: REVALIDATE.list,
+    tags: [tags.list(`tv-genre-${genreId}`)],
+  })
+  return page.results.map((item) => ({ ...item, media_type: 'tv' as const }))
+}
