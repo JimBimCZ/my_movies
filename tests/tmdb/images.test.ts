@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { buildImageUrl, pickSize } from '@/server/tmdb/images'
 
@@ -22,6 +23,12 @@ describe('pickSize', () => {
 
   it('ignores the original entry when a concrete width fits', () => {
     expect(pickSize(POSTER_SIZES, 500)).toBe('w500')
+  })
+
+  it('picks a profile size for the cast card slot', async () => {
+    const { PROFILE_SLOTS, pickSize } = await import('@/server/tmdb/images')
+    const config = JSON.parse(readFileSync('tests/fixtures/tmdb/configuration.json', 'utf8'))
+    expect(pickSize(config.images.profile_sizes, PROFILE_SLOTS.card)).toBe('w185')
   })
 })
 
