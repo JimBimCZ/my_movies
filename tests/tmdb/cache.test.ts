@@ -51,10 +51,13 @@ describe('isKnownTag', () => {
   })
 
   it('stays anchored at both ends', () => {
-    // Dropping ^, $, or the (?:...) group around the alternation all pass the rest of
-    // this suite. Unbracketed, the alternation would make 'nextauth:top-rated:evil' a
-    // known tag on an endpoint reachable over HTTP.
+    // Each string pins a different mutation of LIST_TAG, all of which pass the rest of
+    // this suite: unbracketing the alternation would make 'evil:top-rated' a known tag
+    // via the bare `top-rated` branch, dropping $ would admit the '-x' suffix, and
+    // dropping ^ would let any prefix precede 'tmdb:list:'. isKnownTag guards
+    // POST /api/revalidate, which is reachable over HTTP.
     expect(isKnownTag('evil:top-rated')).toBe(false)
     expect(isKnownTag('tmdb:list:now-playing-x')).toBe(false)
+    expect(isKnownTag('evil:tmdb:list:now-playing')).toBe(false)
   })
 })
