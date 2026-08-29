@@ -14,6 +14,14 @@ export async function SiteHeader() {
         <Link href="/search" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
           Search
         </Link>
+        {session ? (
+          <Link
+            href="/watchlist"
+            className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+          >
+            Watchlist
+          </Link>
+        ) : null}
         <div className="ml-auto flex items-center gap-4 text-sm">
           {session ? (
             <>

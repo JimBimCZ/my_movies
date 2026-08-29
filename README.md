@@ -164,7 +164,6 @@ The TMDB client also respects a `429` with a bounded, jittered retry that honour
 
 ## Not built yet
 
-- **Sign-in and the watchlist.** The schema, the first migration and the watchlist query layer are in place, and `pnpm test:db` exercises the queries against a real Postgres. There is no authentication and no UI, so nothing has yet signed a user in or written a row through the application. The GitHub and Google OAuth apps are registered and their credentials are in place — see [docs/oauth-setup.md](docs/oauth-setup.md) — but no code reads them yet.
 - **Error boundaries.** A TMDB failure currently reaches Next's default error page.
 - **Cache-tag revalidation and CI.** Responses carry cache tags, but nothing revalidates them yet, and there is no pipeline running the gate on push.
 
@@ -175,10 +174,18 @@ Verified by running it, against a real TMDB token and a real Postgres:
 - `/`, `/title/movie/:id`, `/title/tv/:id` and `/search?q=` render live TMDB data; a malformed id returns a real 404.
 - `/api/health` returns `200` against a reachable database and `503` when it is not.
 - The image builds, and the container serves those routes. Stopping Postgres under a running container flips it to `unhealthy` and the route to `503`; starting Postgres again returns it to `healthy`.
-- The built image carries no `.env` file, no build-stage `node_modules`, and no copy of the TMDB token.
 - Both driver branches have now opened a real connection: `node-postgres` against the compose Postgres, and `neon-http` against Neon from a Vercel deployment.
+- Sign-in over GitHub and Google exists, and so does the watchlist: `/watchlist`, plus an optimistic toggle on every title detail page.
+- `node-postgres` now writes. A title added through the running container's own UI comes back from the compose Postgres by joining `users` to `watchlist_items` — the first row this project has written through the application rather than through a test.
+- The toggle is genuinely optimistic and genuinely rolls back. Measured in a browser: the label flips 24ms after the click against an 87ms server round trip; with Postgres stopped it flips at 6.2ms and reverts at 47.4ms, leaving an explanation in a `role="status"` region instead of replacing the page with an error boundary.
+- The built image carries no `.env` file and no build-stage `node_modules`, and no copy of any of the six secrets in `.env.local` — each value was searched for inside the image, with a positive control to prove the search was live.
 
-Still unverified: nothing in the read path. Authentication and the watchlist do not exist yet, so nothing has exercised a write.
+Still unverified:
+
+- **A real OAuth sign-in.** Every signed-in check above presented a session row seeded straight into the `sessions` table as the ordinary session cookie. That exercises `auth()`, the Drizzle adapter and the database session strategy against a real Postgres, but not the GitHub or Google authorization round trip.
+- **The `neon-http` write path.** The migration has not been applied to Neon and nothing has been written from Vercel, so that driver has still only ever read.
+- **Preview deployments.** Sign-in cannot complete on a preview URL by design: neither provider will redirect to a per-deployment host. See [docs/oauth-setup.md](docs/oauth-setup.md).
+- Error boundaries and cache-tag revalidation, as above.
 
 ## Attribution
 
