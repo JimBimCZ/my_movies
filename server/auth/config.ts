@@ -24,7 +24,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
     },
   ),
   session: { strategy: 'database' },
-  providers: [GitHub, Google],
+  // Google reuses the browser's current Google session unless asked not to, so a user whose
+  // email is already bound to GitHub had no way to reach the account picker and pick another.
+  providers: [GitHub, Google({ authorization: { params: { prompt: 'select_account' } } })],
   pages: { signIn: '/signin' },
   callbacks: {
     session({ session, user }) {

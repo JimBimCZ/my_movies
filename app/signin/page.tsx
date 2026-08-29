@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Sign in' }
 
 const ERRORS: Record<string, string> = {
   OAuthAccountNotLinked:
-    'That email address is already registered with a different sign-in provider. Use the one you signed in with the first time.',
+    'That email address is already registered with a different sign-in provider. Sign in with that provider, or choose a different account below.',
   AccessDenied: 'That account is not permitted to sign in.',
 }
 

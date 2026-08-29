@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { projectSession } from '@/server/auth/session'
 
 describe('auth config', () => {
@@ -31,5 +32,19 @@ describe('projectSession', () => {
       user: { id: 'user-1', name: 'Ada', email: 'ada@example.test', image: null },
       expires: '2026-09-01T00:00:00.000Z',
     })
+  })
+})
+
+describe('provider configuration', () => {
+  const source = () => readFileSync('server/auth/config.ts', 'utf8')
+
+  it('asks Google for the account chooser', () => {
+    expect(source()).toContain("prompt: 'select_account'")
+  })
+
+  it('leaves credentials to be inferred from the environment', () => {
+    const code = source()
+    expect(code).not.toMatch(/clientId\s*:/)
+    expect(code).not.toMatch(/clientSecret\s*:/)
   })
 })
