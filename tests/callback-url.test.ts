@@ -24,6 +24,12 @@ describe('safeCallbackUrl', () => {
     expect(safeCallbackUrl('/\\evil.example')).toBe('/')
   })
 
+  it('rejects a host obscured by a stripped control character', () => {
+    expect(safeCallbackUrl('/\t/evil.example')).toBe('/')
+    expect(safeCallbackUrl('/\n/evil.example')).toBe('/')
+    expect(safeCallbackUrl('/\r\\evil.example')).toBe('/')
+  })
+
   it('falls back for anything missing or repeated', () => {
     expect(safeCallbackUrl(undefined)).toBe('/')
     expect(safeCallbackUrl('')).toBe('/')

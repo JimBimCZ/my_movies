@@ -14,7 +14,9 @@ export default async function SignInPage({ searchParams }: PageProps<'/signin'>)
   const { callbackUrl: rawCallback, error: rawError } = await searchParams
   const callbackUrl = safeCallbackUrl(rawCallback)
   const errorKey = Array.isArray(rawError) ? rawError[0] : rawError
-  const message = errorKey ? (ERRORS[errorKey] ?? 'Sign-in failed. Please try again.') : null
+  const message = errorKey
+    ? (Object.hasOwn(ERRORS, errorKey) ? ERRORS[errorKey] : 'Sign-in failed. Please try again.')
+    : null
 
   const withGitHub = signInWithProvider.bind(null, 'github', callbackUrl)
   const withGoogle = signInWithProvider.bind(null, 'google', callbackUrl)
