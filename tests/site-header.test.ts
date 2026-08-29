@@ -29,15 +29,11 @@ describe('site header', () => {
     expect(code).toContain('via-black/60')
   })
 
-  it('does not put nav links on the muted colour', () => {
+  it('does not put any header text on the muted colour', () => {
     // --muted is #9b9ba3. Over a bright backdrop with only a partial scrim it does not
-    // reach 4.5:1, and every link in the header sat on it.
-    const code = header()
-    const linkClasses = [...code.matchAll(/className="([^"]*)"/g)].map((match) => match[1]!)
-    const navClasses = linkClasses.filter((value) => value.includes('text-sm'))
-    expect(navClasses.length).toBeGreaterThan(0)
-    for (const value of navClasses) {
-      expect(value).not.toContain('text-[var(--muted)]')
-    }
+    // reach 4.5:1, and every link, the sign-out button and the session name sat on it.
+    // Asserted file-wide: three of the five inherit text-sm from an ancestor, so a
+    // filter keyed on that class would not see them regress.
+    expect(header()).not.toContain('text-[var(--muted)]')
   })
 })
