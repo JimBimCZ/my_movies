@@ -68,6 +68,16 @@ Migrations are never run on container start — concurrent containers would race
 pnpm db:migrate
 ```
 
+## Deploying
+
+Two targets, both first-class.
+
+**Vercel.** The project builds from `main` on push. Postgres comes from the Neon marketplace integration, which injects `DATABASE_URL` and `DATABASE_URL_UNPOOLED` — the names the app already reads. The only variable you add by hand is `TMDB_ACCESS_TOKEN`.
+
+`next.config.ts` sets `output: 'standalone'` everywhere except on Vercel, which traces its own output; leaving `standalone` on there fails Vercel's post-build hook with a missing `next-server.js.nft.json`.
+
+**Container.** See below — one image, any Postgres.
+
 ## Docker
 
 The image is one self-contained artifact: an env file and a reachable Postgres are enough to get a working instance. No sidecar, no build step at container start, no reverse proxy. Nothing is baked in — no token, no database URL, no `.env`.
@@ -155,8 +165,9 @@ Verified by running it, against a real TMDB token and a real Postgres:
 - `/api/health` returns `200` against a reachable database and `503` when it is not.
 - The image builds, and the container serves those routes. Stopping Postgres under a running container flips it to `unhealthy` and the route to `503`; starting Postgres again returns it to `healthy`.
 - The built image carries no `.env` file, no build-stage `node_modules`, and no copy of the TMDB token.
+- Both driver branches have now opened a real connection: `node-postgres` against the compose Postgres, and `neon-http` against Neon from a Vercel deployment.
 
-**Not verified: the `neon-http` branch of `server/db/client.ts`.** No Neon `DATABASE_URL` existed while this was written, so only the `node-postgres` branch has ever opened a connection. Confirming Neon over HTTP is the first task of the deploy step.
+Still unverified: nothing in the read path. Authentication and the watchlist do not exist yet, so nothing has exercised a write.
 
 ## Attribution
 
