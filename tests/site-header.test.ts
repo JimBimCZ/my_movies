@@ -17,4 +17,9 @@ describe('site header', () => {
     expect(header()).toContain('/signin')
     expect(header()).toContain('signOutAction')
   })
+
+  it('links to the watchlist only when signed in', () => {
+    expect(header()).toContain('href="/watchlist"')
+    expect(header()).toMatch(/session \? \(\s*<Link\s+href="\/watchlist"/)
+  })
 })
