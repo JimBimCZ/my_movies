@@ -15,8 +15,8 @@ describe('trailer player', () => {
 
   it('mounts the iframe only after the play state is set', () => {
     const code = player()
-    expect(code).toContain('useState')
-    expect(code).toMatch(/playing \?|playing &&/)
+    expect(code).toContain('useState(false)')
+    expect(code).toMatch(/playing \?\s*\(?\s*<iframe/)
   })
 
   it('embeds through the no-cookie host', () => {
@@ -35,6 +35,6 @@ describe('title detail page trailer section', () => {
   it('renders the section only when a trailer was found', () => {
     const code = page()
     expect(code).toContain('pickTrailer(detail.videos.results)')
-    expect(code).toMatch(/trailer &&/)
+    expect(code).toMatch(/\{trailer &&/)
   })
 })

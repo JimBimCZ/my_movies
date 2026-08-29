@@ -31,9 +31,12 @@ export function TrailerPlayer({
           className="group absolute inset-0 h-full w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           {thumbnail && (
-            <Image src={thumbnail} alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
+            <Image src={thumbnail} alt="" fill sizes="(max-width: 1024px) 100vw, 976px" className="object-cover" />
           )}
-          <span className="absolute inset-0 flex items-center justify-center bg-black/40 transition-colors group-hover:bg-black/25">
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 flex items-center justify-center bg-black/40 transition-colors group-hover:bg-black/25"
+          >
             <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-2xl text-black">
               ▶
             </span>
