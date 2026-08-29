@@ -7,7 +7,10 @@ describe('genre page', () => {
   it('404s on a slug TMDB does not know', () => {
     const code = page()
     expect(code).toContain('findGenreBySlug')
-    expect(code).toContain('notFound()')
+    // generateMetadata has its own guard; the page body needs one too, above the
+    // Suspense flush boundary, or a bad slug renders 200 with the 404 markup.
+    const guards = code.match(/if \(!genre\) notFound\(\)/g) ?? []
+    expect(guards).toHaveLength(2)
   })
 
   it('renders a movie row and a tv row from their own endpoints', () => {
@@ -32,5 +35,16 @@ describe('genre page', () => {
 
   it('names the genre in the page metadata', () => {
     expect(page()).toContain('generateMetadata')
+  })
+
+  it('gives the series row priority only when it renders as the first row', () => {
+    // Eight of the 27 genres are tv-only, so the series row is their LCP image;
+    // a plain, unconditional <Row> would re-lazy-load it on every one of them.
+    const code = page()
+    expect(code).toMatch(/priorityCount=\{genre\.movieId === undefined \? FIRST_ROW_PRIORITY_COUNT : 0\}/)
+    expect(code).toMatch(/function SeriesRow\(\{ genreId, priorityCount \}/)
+    expect(code).toContain(
+      '<Row title="Series" items={items.map((item) => toCardItem(item))} priorityCount={priorityCount} />',
+    )
   })
 })

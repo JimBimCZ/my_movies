@@ -77,8 +77,10 @@ describe('cast row', () => {
   })
 
   it('names both the actor and the character', () => {
+    // alt={member.name} alone would satisfy a bare toContain('member.name'); the name
+    // has to be rendered as visible text too, not only as image alt text.
     const code = castRow()
-    expect(code).toContain('member.name')
+    expect(code).toMatch(/<p[^>]*>\{member\.name\}<\/p>/)
     expect(code).toContain('member.character')
   })
 

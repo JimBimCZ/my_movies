@@ -64,8 +64,11 @@ describe('mergeGenres', () => {
   })
 
   it('sorts alphabetically by name', () => {
+    // The locale is pinned to 'en' in lib/genres.ts specifically because sort order
+    // is locale-dependent; a locale-less comparator here would fail this assertion
+    // under a differently-collating locale (e.g. lt-LT) even though the code is right.
     const names = mergeGenres(movieGenres(), tvGenres()).map((genre) => genre.name)
-    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'en')))
   })
 
   it('never produces an entry with neither id', () => {

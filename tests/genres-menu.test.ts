@@ -9,10 +9,12 @@ describe('genres menu', () => {
   })
 
   it('opens on hover and on click, not on hover alone', () => {
-    // A hover-only menu is unreachable by keyboard and unusable on touch.
+    // A hover-only menu is unreachable by keyboard and unusable on touch. Anchored
+    // to onPointerEnter specifically: pointerType === 'mouse' also occurs under
+    // onPointerLeave, so a file-wide match would not catch onPointerEnter reverting
+    // to an ungated handler, which reintroduces the touch first-tap bug.
     const code = menu()
-    expect(code).toMatch(/onPointerEnter/)
-    expect(code).toMatch(/pointerType === 'mouse'/)
+    expect(code).toMatch(/onPointerEnter=\{\(event\) =>[\s\S]{0,80}pointerType === 'mouse'/)
     expect(code).toMatch(/aria-expanded=\{open\}[\s\S]{0,200}onClick/)
   })
 
@@ -29,7 +31,9 @@ describe('genres menu', () => {
   })
 
   it('closes when focus leaves the menu entirely', () => {
-    expect(menu()).toMatch(/contains\(event\.relatedTarget\)/)
+    // Anchored on the leading `!`: without it, moving focus outside the menu
+    // would open it instead of closing it.
+    expect(menu()).toMatch(/!event\.currentTarget\.contains\(event\.relatedTarget\)/)
   })
 
   it('hides the panel from the tree when closed, rather than only visually', () => {
