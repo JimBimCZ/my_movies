@@ -183,7 +183,7 @@ Verified by running it, against a real TMDB token and a real Postgres:
 Still unverified:
 
 - **A real OAuth sign-in.** Every signed-in check above presented a session row seeded straight into the `sessions` table as the ordinary session cookie. That exercises `auth()`, the Drizzle adapter and the database session strategy against a real Postgres, but not the GitHub or Google authorization round trip.
-- **The `neon-http` write path.** The migration has not been applied to Neon and nothing has been written from Vercel, so that driver has still only ever read.
+- **The `neon-http` write path.** The migration *is* applied to Neon — all four tables exist, and drizzle's journal records entry `id=1` at 2026-08-29 10:59 UTC — but every table is empty and nothing has been written from Vercel, so that driver has still only ever read.
 - **Preview deployments.** Sign-in cannot complete on a preview URL by design: neither provider will redirect to a per-deployment host. See [docs/oauth-setup.md](docs/oauth-setup.md).
 - Error boundaries and cache-tag revalidation, as above.
 
