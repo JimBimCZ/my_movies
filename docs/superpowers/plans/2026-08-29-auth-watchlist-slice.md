@@ -310,7 +310,7 @@ a pgEnum, so a new value never needs an ALTER TYPE."
 - Create: `vitest.db.config.ts`
 - Create: `tests/db-integration/setup.ts`
 - Create: `tests/db-integration/watchlist.test.ts`
-- Modify: `vitest.config.ts`, `package.json`, `.env.example`, `README.md`
+- Modify: `vitest.config.ts`, `package.json`, `README.md`, `CLAUDE.md`
 
 **Interfaces:**
 - Consumes: `getDb` from `@/server/db/client`; `watchlistItems` from `@/server/db/schema`; `MediaType` from `@/server/tmdb/types`.
@@ -369,11 +369,12 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 
 export default async function setup() {
-  const url = process.env.TEST_DATABASE_URL
+  const url = process.env.DATABASE_URL
   if (!url) {
     throw new Error(
-      'TEST_DATABASE_URL is not set. Start the local database with `docker compose up -d db` ' +
-        'and run `pnpm test:db`, which supplies it.',
+      'DATABASE_URL is not set. Start the local database with ' +
+        '`set -a; . ./.env.local; set +a; docker compose up -d db` and run `pnpm test:db`, ' +
+        'which supplies it.',
     )
   }
 
@@ -388,15 +389,17 @@ export default async function setup() {
 
 Failing loudly on a missing variable is deliberate: a suite that silently skips when the database is absent reports green while proving nothing.
 
+The variable is `DATABASE_URL` — the same one `getDb()` reads — and there is deliberately no second `TEST_DATABASE_URL`. The harness and the code under test must resolve to the same database, and two variables can diverge: with a separate `TEST_DATABASE_URL` set and a real `DATABASE_URL` exported in the shell, `setup.ts` migrates the test database while `beforeEach` truncates whatever `DATABASE_URL` points at. That is silent data loss, and it only shows up when someone runs `vitest --config vitest.db.config.ts` directly instead of through `pnpm test:db` — the obvious move when iterating on one failing test. One variable cannot diverge from itself. Do not reintroduce a dedicated test variable for clarity; the clarity is not worth the failure mode.
+
 - [ ] **Step 4: Add the script**
 
 In `package.json`, alongside `"test"`:
 
 ```json
-    "test:db": "TEST_DATABASE_URL=postgresql://postgres:devpass@localhost:5433/movies DATABASE_URL=postgresql://postgres:devpass@localhost:5433/movies DB_DRIVER=node-postgres vitest run --config vitest.db.config.ts",
+    "test:db": "DATABASE_URL=postgresql://postgres:devpass@localhost:5433/movies DB_DRIVER=node-postgres vitest run --config vitest.db.config.ts",
 ```
 
-`DATABASE_URL` and `DB_DRIVER` are set because the repository under test calls `getDb()`, which reads them.
+`DATABASE_URL` and `DB_DRIVER` are set because the repository under test calls `getDb()`, which reads them — and `tests/db-integration/setup.ts` reads the same `DATABASE_URL` to pick the database it migrates.
 
 - [ ] **Step 5: Write the failing tests**
 
@@ -620,17 +623,26 @@ docker compose exec -T db psql -U postgres -d movies -c "delete from users where
 
 - [ ] **Step 10: Document the new script**
 
-Add `TEST_DATABASE_URL` to `.env.example` with an empty value, and add a line to the README's Testing section:
+No new variable goes into `.env.example`: `test:db` supplies `DATABASE_URL` itself, and `DATABASE_URL` is already listed there. Add to the README's Testing section:
 
-```markdown
-`pnpm test` is hermetic and makes no network or database calls. `pnpm test:db` runs the watchlist repository against the compose Postgres — start it first with `docker compose up -d db`.
+````markdown
+`pnpm test` is hermetic and makes no network or database calls. `pnpm test:db` runs the watchlist repository against the compose Postgres, applying the migrations first. Start that database with:
+
+```bash
+set -a; . ./.env.local; set +a
+docker compose up -d db
 ```
+
+Compose interpolates the whole file, so the `app` service's token guard blocks every subcommand until the env file is sourced — see the comment on that guard in [`docker-compose.yml`](./docker-compose.yml).
+````
+
+Sourcing the env file is not optional. `docker compose up -d db` alone fails during interpolation on the `app` service's `${TMDB_ACCESS_TOKEN:?...}` guard, even though bringing up the database has nothing to do with TMDB. Also add `pnpm test:db` to the Commands block in `CLAUDE.md`.
 
 - [ ] **Step 11: Run the full gate and commit**
 
 ```bash
 pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:db
-git add server/watchlist tests/db-integration vitest.config.ts vitest.db.config.ts package.json .env.example README.md
+git add server/watchlist tests/db-integration vitest.config.ts vitest.db.config.ts package.json README.md CLAUDE.md
 git commit -m "Add the watchlist repository, tested against a real Postgres
 
 Ownership is enforced in the where clause of every query, so a wrong user id
