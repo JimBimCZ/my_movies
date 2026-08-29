@@ -153,7 +153,7 @@ The TMDB client also respects a `429` with a bounded, jittered retry that honour
 
 ## Not built yet
 
-- **Sign-in and the watchlist.** No authentication, no `watchlist_items` table.
+- **Sign-in and the watchlist.** No authentication, no `watchlist_items` table. The GitHub and Google OAuth apps are registered and their credentials are in place — see [docs/oauth-setup.md](docs/oauth-setup.md) — but no code reads them yet.
 - **Error boundaries.** A TMDB failure currently reaches Next's default error page.
 - **Cache-tag revalidation and CI.** Responses carry cache tags, but nothing revalidates them yet, and there is no pipeline running the gate on push.
 
