@@ -11,7 +11,8 @@ describe('genres menu', () => {
   it('opens on hover and on click, not on hover alone', () => {
     // A hover-only menu is unreachable by keyboard and unusable on touch.
     const code = menu()
-    expect(code).toMatch(/onPointerEnter|onMouseEnter/)
+    expect(code).toMatch(/onPointerEnter/)
+    expect(code).toMatch(/pointerType === 'mouse'/)
     expect(code).toMatch(/aria-expanded=\{open\}[\s\S]{0,200}onClick/)
   })
 
