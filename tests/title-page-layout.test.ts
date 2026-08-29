@@ -101,7 +101,7 @@ describe('backdrop carousel', () => {
   })
 
   it('renders nothing when the title has no extra images', () => {
-    expect(carousel()).toMatch(/images\.length === 0/)
+    expect(carousel()).toMatch(/images\.length === 0\) return null/)
   })
 
   it('lazily loads the stills, which are all below the fold', () => {
@@ -120,5 +120,13 @@ describe('title detail page images section', () => {
     const code = page()
     expect(code).toContain('BACKDROP_LIMIT')
     expect(code).toContain('pickBackdrops(detail.images, BACKDROP_LIMIT)')
+  })
+
+  it('renders the image carousel after the cast row', () => {
+    const code = page()
+    const cast = code.indexOf('<CastRow')
+    const carousel = code.indexOf('<BackdropCarousel')
+    expect(cast).toBeGreaterThan(-1)
+    expect(cast).toBeLessThan(carousel)
   })
 })

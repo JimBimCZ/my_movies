@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 const home = () => readFileSync('app/page.tsx', 'utf8')
 const search = () => readFileSync('app/search/page.tsx', 'utf8')
 const rowSkeleton = () => readFileSync('components/row-skeleton.tsx', 'utf8')
+const titleLoading = () => readFileSync('app/title/[mediaType]/[id]/loading.tsx', 'utf8')
 
 describe('loading skeletons', () => {
   it('gives the hero a skeleton shaped like the hero, not a bare block', () => {
@@ -31,5 +32,18 @@ describe('loading skeletons', () => {
     const code = rowSkeleton()
     expect(code).toMatch(/title\?:/)
     expect(code).toMatch(/title \?/)
+  })
+})
+
+describe('title detail skeleton', () => {
+  it('reserves the facts block the page now renders', () => {
+    expect(titleLoading()).toContain('animate-pulse')
+    expect(titleLoading()).toMatch(/grid|sm:grid-cols-2/)
+  })
+
+  it('reserves a row below the fold for the cast', () => {
+    // Without it the page grows by a full row height when the data lands and
+    // everything below jumps.
+    expect(titleLoading()).toContain('RowSkeleton')
   })
 })
