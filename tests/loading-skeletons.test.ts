@@ -44,6 +44,6 @@ describe('title detail skeleton', () => {
   it('reserves a row below the fold for the cast', () => {
     // Without it the page grows by a full row height when the data lands and
     // everything below jumps.
-    expect(titleLoading()).toContain('RowSkeleton')
+    expect(titleLoading()).toContain('<RowSkeleton')
   })
 })
