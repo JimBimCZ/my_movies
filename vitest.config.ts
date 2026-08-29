@@ -6,6 +6,10 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     exclude: ['**/node_modules/**', 'tests/db-integration/**'],
+    // next-auth imports 'next/server', and the next package ships no exports map, so Node's
+    // ESM resolver cannot resolve the extensionless subpath. Letting Vite transform next-auth
+    // instead of externalising it puts the import through a resolver that can.
+    server: { deps: { inline: ['next-auth'] } },
   },
   resolve: {
     alias: {
