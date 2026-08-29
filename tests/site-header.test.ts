@@ -10,7 +10,7 @@ describe('site header', () => {
   })
 
   it('is not a client component', () => {
-    expect(header()).not.toContain("'use client'")
+    expect(header()).not.toMatch(/["']use client["']/)
   })
 
   it('offers sign-in when signed out and sign-out when signed in', () => {

@@ -6,7 +6,7 @@ import GitHub from 'next-auth/providers/github'
 import Google from 'next-auth/providers/google'
 import { getDb } from '@/server/db/client'
 import { accounts, sessions, users } from '@/server/db/schema'
-import { projectSession } from '@/server/auth/session'
+import { projectSession } from './session'
 
 // next build evaluates route modules while collecting page data, so building the adapter at
 // module scope would construct a database client during a build that has no DATABASE_URL —

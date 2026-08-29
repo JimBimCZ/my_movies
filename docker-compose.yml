@@ -27,6 +27,11 @@ services:
       # `TMDB_ACCESS_TOKEN=x docker compose down -v`.
       TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:?set TMDB_ACCESS_TOKEN before running compose, e.g. set -a; . ./.env.local; set +a}
       AUTH_URL: http://localhost:3000
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET before running compose, e.g. set -a; . ./.env.local; set +a}
+      AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:?set AUTH_GITHUB_ID before running compose, e.g. set -a; . ./.env.local; set +a}
+      AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:?set AUTH_GITHUB_SECRET before running compose, e.g. set -a; . ./.env.local; set +a}
+      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:?set AUTH_GOOGLE_ID before running compose, e.g. set -a; . ./.env.local; set +a}
+      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:?set AUTH_GOOGLE_SECRET before running compose, e.g. set -a; . ./.env.local; set +a}
     depends_on:
       db:
         condition: service_healthy

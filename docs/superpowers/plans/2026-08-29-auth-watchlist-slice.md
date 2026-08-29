@@ -855,10 +855,10 @@ Add to `.env.example`, each with an empty value: `AUTH_GITHUB_ID`, `AUTH_GITHUB_
 - [ ] **Step 9: Prove the build survives without a database**
 
 ```bash
-env -u DATABASE_URL -u DATABASE_URL_UNPOOLED pnpm build
+docker build -t movies-app .
 ```
 
-Expected: PASS. This is the container build stage's exact condition; if it fails, the adapter is being constructed too early.
+Expected: PASS (exit 0). This is the real proof: `next build` loads `.env.local` regardless of the shell's exported variables, so `env -u DATABASE_URL -u DATABASE_URL_UNPOOLED pnpm build` does not reproduce a database-less build whenever `.env.local` itself defines `DATABASE_URL` — the `-u` flags are void once the build re-reads the file. `docker build` is the container's actual build stage and does not read `.env.local` (`.dockerignore` excludes it), so it is the only command that genuinely exercises this condition.
 
 - [ ] **Step 10: Run the full gate and commit**
 
@@ -1572,7 +1572,9 @@ region instead of the nearest error boundary."
 **Files:**
 - Create: `app/watchlist/page.tsx`
 - Create: `app/watchlist/loading.tsx`
+- Modify: `components/site-header.tsx`
 - Test: `tests/watchlist-page.test.ts`
+- Modify: `tests/site-header.test.ts`
 
 **Interfaces:**
 - Consumes: `auth`; `listForUser`; `getImageConfig` from `@/server/tmdb/images`; `PosterCard`; `WatchlistButton`.
@@ -1708,27 +1710,45 @@ export default function Loading() {
 }
 ```
 
-- [ ] **Step 5: Run the test and watch it pass**
+- [ ] **Step 5: Restore the header link to `/watchlist`**
 
-```bash
-npx vitest run tests/watchlist-page.test.ts
+Task 6 built the header without a link to `/watchlist`, deliberately deferred: bloc 2 merges to `main` before the `/watchlist` route exists, and a link to a 404 must not ship. Now that the route exists, restore it. In `components/site-header.tsx`, add the link back into the `nav`, between the `Search` link and the `ml-auto` div, matching the styling of the sibling `Search` link already there:
+
+```tsx
+{session ? (
+  <Link
+    href="/watchlist"
+    className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+  >
+    Watchlist
+  </Link>
+) : null}
 ```
 
-Expected: PASS, 3 tests.
+Add an assertion to `tests/site-header.test.ts` that the link is present when signed in, e.g. `expect(header()).toContain('href="/watchlist"')`.
 
-- [ ] **Step 6: Exercise the whole loop in the browser**
+- [ ] **Step 6: Run the tests and watch them pass**
 
-Signed out, visit `/watchlist` — expect a redirect to `/signin`, and after signing in, a return to `/watchlist`. Add two titles from detail pages, confirm both appear newest-first, remove one from the watchlist page itself and confirm it disappears without a full reload. Confirm the empty state renders once everything is removed.
+```bash
+npx vitest run tests/watchlist-page.test.ts tests/site-header.test.ts
+```
 
-- [ ] **Step 7: Run the full gate and commit**
+Expected: PASS.
+
+- [ ] **Step 7: Exercise the whole loop in the browser**
+
+Signed out, visit `/watchlist` — expect a redirect to `/signin`, and after signing in, a return to `/watchlist`. Confirm the header now shows a Watchlist link when signed in. Add two titles from detail pages, confirm both appear newest-first, remove one from the watchlist page itself and confirm it disappears without a full reload. Confirm the empty state renders once everything is removed.
+
+- [ ] **Step 8: Run the full gate and commit**
 
 ```bash
 pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:db
-git add app/watchlist tests/watchlist-page.test.ts
+git add app/watchlist components/site-header.tsx tests/watchlist-page.test.ts tests/site-header.test.ts
 git commit -m "Add the watchlist page
 
 Rendered entirely from the denormalised snapshot, so the page makes one cached
-TMDB request for image configuration and none per row."
+TMDB request for image configuration and none per row. Restores the header's
+Watchlist link, deferred from Task 6 until the route existed."
 ```
 
 ---
