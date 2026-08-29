@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { WatchlistButton } from '@/components/watchlist-button'
+import { auth } from '@/server/auth/config'
 import { TmdbError } from '@/server/tmdb/client'
 import { getTitleDetail } from '@/server/tmdb/endpoints/titles'
 import { BACKDROP_SLOTS, POSTER_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/server/tmdb/images'
+import { isInWatchlist } from '@/server/watchlist/queries'
 import { parseMediaType, parseTmdbId } from '@/lib/route-params'
 
 export async function generateMetadata({
@@ -38,6 +41,9 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
   })
 
   const images = await getImageConfig()
+  const session = await auth()
+  const userId = session?.user?.id
+  const inWatchlist = userId ? await isInWatchlist(userId, id, mediaType) : false
   const title = detail.media_type === 'movie' ? detail.title : detail.name
   const releaseDate = detail.media_type === 'movie' ? detail.release_date : detail.first_air_date
   const releaseYear = releaseDate ? releaseDate.slice(0, 4) : null
@@ -86,6 +92,15 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
             ))}
           </ul>
           <p className="mt-5 max-w-2xl leading-relaxed">{detail.overview}</p>
+          <div className="mt-6">
+            <WatchlistButton
+              tmdbId={id}
+              mediaType={mediaType}
+              inWatchlist={inWatchlist}
+              signedIn={Boolean(userId)}
+              returnTo={`/title/${mediaType}/${id}`}
+            />
+          </div>
         </div>
       </div>
     </main>

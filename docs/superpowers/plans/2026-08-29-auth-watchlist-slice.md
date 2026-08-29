@@ -1302,7 +1302,12 @@ export async function toggleWatchlist(input: unknown): Promise<ToggleResult> {
 
   const session = await auth()
   const userId = session?.user?.id
-  if (!userId) return { ok: false, message: 'Sign in to use your watchlist.' }
+  // auth() returns null both for a signed-out visitor and for a signed-in one whose session
+  // lookup hit an unreachable database — Auth.js swallows that connection error — so this
+  // message has to be true in either case rather than telling a signed-in user to sign in.
+  if (!userId) {
+    return { ok: false, message: 'Your session could not be confirmed. Reload and try again.' }
+  }
 
   const { tmdbId, mediaType } = parsed
   let nowInWatchlist: boolean
@@ -1543,7 +1548,16 @@ Stop the database under the running dev server and click the toggle:
 docker compose stop db
 ```
 
-Expected: the label flips optimistically, then reverts, and the `role="status"` region shows "Could not update your watchlist. Try again." The page must not be replaced by an error boundary — if it is, the action is throwing where it should return `{ ok: false }`. Restart with `docker compose start db`.
+Expected: the label flips optimistically, then reverts, and the `role="status"` region shows
+"Your session could not be confirmed. Reload and try again." The page must not be replaced by an
+error boundary — if it is, the action is throwing where it should return `{ ok: false }`. Restart
+with `docker compose start db`.
+
+The message is deliberately not "Could not update your watchlist. Try again.", which this step
+originally expected. `auth()` needs the database too, and Auth.js swallows the `ECONNREFUSED`
+and returns `null`, so a dead database is indistinguishable from a signed-out visitor at that
+line and the toggle's own `catch` is never reached. Verified 2026-08-29: the label flipped at
+6.2ms and reverted at 47.4ms, and the page stayed on the title.
 
 - [ ] **Step 8: Run the full gate and commit**
 

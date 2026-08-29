@@ -17,7 +17,12 @@ export async function toggleWatchlist(input: unknown): Promise<ToggleResult> {
 
   const session = await auth()
   const userId = session?.user?.id
-  if (!userId) return { ok: false, message: 'Sign in to use your watchlist.' }
+  // auth() returns null both for a signed-out visitor and for a signed-in one whose session
+  // lookup hit an unreachable database — Auth.js swallows that connection error — so this
+  // message has to be true in either case rather than telling a signed-in user to sign in.
+  if (!userId) {
+    return { ok: false, message: 'Your session could not be confirmed. Reload and try again.' }
+  }
 
   const { tmdbId, mediaType } = parsed
   let nowInWatchlist: boolean
