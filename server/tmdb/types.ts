@@ -149,7 +149,7 @@ export interface Creator {
 
 export interface CastMember {
   adult: boolean
-  cast_id: number
+  cast_id?: number
   gender: number
   id: number
   known_for_department: string

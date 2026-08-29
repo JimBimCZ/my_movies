@@ -269,6 +269,15 @@ describe('captured TMDB payloads', () => {
     expect(detail.credits.crew.some((member) => member.job === 'Director')).toBe(true)
   })
 
+  it('cast_id is a movie-credits field: tv cast entries omit it entirely', () => {
+    // Not null — the key is absent. CastMember is shared by both media types, so it
+    // has to be optional or every tv cast entry is a lie about its own shape.
+    const movie = load('movie-detail') as MovieDetailFull
+    const tv = load('tv-detail') as TvDetailFull
+    expect(movie.credits.cast.every((member) => 'cast_id' in member)).toBe(true)
+    expect(tv.credits.cast.some((member) => 'cast_id' in member)).toBe(false)
+  })
+
   it('tv credits name no Director; the creator lives on created_by', () => {
     const detail = load('tv-detail') as TvDetailFull
     expect(detail.credits.crew.some((member) => member.job === 'Director')).toBe(false)
