@@ -152,6 +152,10 @@ DATABASE_URL_UNPOOLED   # direct connection, migrations only
 DB_DRIVER               # 'neon-http' | 'node-postgres'; defaults by runtime, override to force
 AUTH_SECRET
 AUTH_URL                # required in the container; inferred on Vercel
+AUTH_GITHUB_ID
+AUTH_GITHUB_SECRET
+AUTH_GOOGLE_ID
+AUTH_GOOGLE_SECRET
 PORT / HOSTNAME         # container only, defaults 3000 / 0.0.0.0
 ```
 

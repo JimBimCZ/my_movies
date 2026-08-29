@@ -72,7 +72,7 @@ pnpm db:migrate
 
 Two targets, both first-class.
 
-**Vercel.** The project builds from `main` on push. Postgres comes from the Neon marketplace integration, which injects `DATABASE_URL` and `DATABASE_URL_UNPOOLED` — the names the app already reads. The only variable you add by hand is `TMDB_ACCESS_TOKEN`.
+**Vercel.** The project builds from `main` on push. Postgres comes from the Neon marketplace integration, which injects `DATABASE_URL` and `DATABASE_URL_UNPOOLED` — the names the app already reads. The variables you add by hand are `TMDB_ACCESS_TOKEN`, `AUTH_SECRET`, and the four provider variables: `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`. See [docs/oauth-setup.md](docs/oauth-setup.md) for how the OAuth apps behind those provider variables were registered.
 
 `next.config.ts` sets `output: 'standalone'` everywhere except on Vercel, which traces its own output; leaving `standalone` on there fails Vercel's post-build hook with a missing `next-server.js.nft.json`.
 
@@ -81,6 +81,8 @@ Two targets, both first-class.
 ## Docker
 
 The image is one self-contained artifact: an env file and a reachable Postgres are enough to get a working instance. No sidecar, no build step at container start, no reverse proxy. Nothing is baked in — no token, no database URL, no `.env`.
+
+The env file needs `AUTH_SECRET` and the four provider variables (`AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`) for sign-in to work, plus `AUTH_URL` — Vercel infers that one, but the container needs it set explicitly. See [docs/oauth-setup.md](docs/oauth-setup.md) for where the provider values come from.
 
 ```bash
 docker build -t movies-app .
@@ -96,7 +98,7 @@ set -a; . ./.env.local; set +a   # compose reads TMDB_ACCESS_TOKEN from the envi
 docker compose up -d --build
 ```
 
-Compose fails fast when `TMDB_ACCESS_TOKEN` is unset rather than serving an empty catalogue that looks fine. That guard also blocks `ps`, `logs`, `stop` and `down`, so any placeholder unblocks teardown if you no longer have the value at hand: `TMDB_ACCESS_TOKEN=x docker compose down -v`.
+Compose fails fast when `TMDB_ACCESS_TOKEN` or any of the auth variables is unset rather than serving an empty catalogue that looks fine. That guard also blocks `ps`, `logs`, `stop` and `down`, so every guarded variable needs a placeholder to unblock teardown if you no longer have the values at hand: `TMDB_ACCESS_TOKEN=x AUTH_SECRET=x AUTH_GITHUB_ID=x AUTH_GITHUB_SECRET=x AUTH_GOOGLE_ID=x AUTH_GOOGLE_SECRET=x docker compose down -v`.
 
 ## Commands
 
@@ -139,7 +141,7 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full conventions.
 pnpm test
 ```
 
-`pnpm test` is hermetic and makes no network or database calls. `pnpm test:db` runs the watchlist repository against the compose Postgres, applying the migrations first. Start that database with:
+`pnpm test` is hermetic and makes no network or database calls. `pnpm test:db` runs the watchlist repository against the compose Postgres, applying the migrations first. It truncates `users`, `accounts`, `sessions` and `watchlist_items` in whatever database `DATABASE_URL` points at, so if that is the same database your dev server is signed in against, running it ends that session. Start that database with:
 
 ```bash
 set -a; . ./.env.local; set +a
