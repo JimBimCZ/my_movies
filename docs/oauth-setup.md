@@ -45,9 +45,10 @@ environments.
 1. https://console.cloud.google.com → new project.
 2. **Google Auth Platform** (older layouts: **APIs & Services → OAuth consent
    screen**): app name, support email, **External** audience, contact email.
-3. While publishing status is **Testing**, add your own account under **Test
-   users**. Without this, sign-in fails with `access_denied` even though
-   everything else is correct.
+3. Publishing status is **In production** as of 2026-08-29, so any Google
+   account can sign in and no Test users list applies. While an app is still
+   **Testing**, only accounts listed under **Test users** can sign in —
+   everyone else gets `access_denied` even though everything else is correct.
 4. **Clients** → **Create client** → **Web application**. Authorized JavaScript
    origins: both origins above. Authorized redirect URIs: both Google callback
    URLs above.
