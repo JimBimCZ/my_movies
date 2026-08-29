@@ -49,4 +49,12 @@ describe('isKnownTag', () => {
     expect(isKnownTag('tmdb:title:movie:abc')).toBe(false)
     expect(isKnownTag('tmdb:title:movie:12:34')).toBe(false)
   })
+
+  it('stays anchored at both ends', () => {
+    // Dropping ^, $, or the (?:...) group around the alternation all pass the rest of
+    // this suite. Unbracketed, the alternation would make 'nextauth:top-rated:evil' a
+    // known tag on an endpoint reachable over HTTP.
+    expect(isKnownTag('evil:top-rated')).toBe(false)
+    expect(isKnownTag('tmdb:list:now-playing-x')).toBe(false)
+  })
 })

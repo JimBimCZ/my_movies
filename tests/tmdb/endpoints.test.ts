@@ -224,3 +224,51 @@ describe('search', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })
+
+describe('merged genres', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    process.env.TMDB_ACCESS_TOKEN = 'test-token'
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  const respondPerUrl = () =>
+    vi.fn().mockImplementation((url: string) => {
+      const body = url.includes('/genre/tv/list') ? fixture('genres-tv') : fixture('genres-movie')
+      return Promise.resolve(
+        new Response(JSON.stringify(body), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+    })
+
+  it('reads both lists and returns their union', async () => {
+    vi.stubGlobal('fetch', respondPerUrl())
+    const { getMergedGenres } = await import('@/server/tmdb/endpoints/genres')
+
+    const merged = await getMergedGenres()
+
+    expect(merged).toHaveLength(27)
+    expect(merged.find((genre) => genre.slug === 'drama')).toEqual({
+      slug: 'drama',
+      name: 'Drama',
+      movieId: 18,
+      tvId: 18,
+    })
+  })
+
+  it('finds a genre by slug', async () => {
+    vi.stubGlobal('fetch', respondPerUrl())
+    const { findGenreBySlug } = await import('@/server/tmdb/endpoints/genres')
+
+    expect((await findGenreBySlug('sci-fi-and-fantasy'))?.tvId).toBe(10765)
+  })
+
+  it('returns null for a slug TMDB does not have', async () => {
+    vi.stubGlobal('fetch', respondPerUrl())
+    const { findGenreBySlug } = await import('@/server/tmdb/endpoints/genres')
+
+    expect(await findGenreBySlug('not-a-genre')).toBeNull()
+  })
+})

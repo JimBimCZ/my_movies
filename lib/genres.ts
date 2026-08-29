@@ -31,5 +31,5 @@ export function mergeGenres(movieGenres: Genre[], tvGenres: Genre[]): MergedGenr
   for (const genre of movieGenres) add(genre, 'movieId')
   for (const genre of tvGenres) add(genre, 'tvId')
 
-  return [...merged.values()].sort((a, b) => a.name.localeCompare(b.name))
+  return [...merged.values()].sort((a, b) => a.name.localeCompare(b.name, 'en'))
 }
