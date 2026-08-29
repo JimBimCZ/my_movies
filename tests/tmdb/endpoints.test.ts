@@ -129,7 +129,7 @@ describe('title endpoints', () => {
   })
   afterEach(() => vi.unstubAllGlobals())
 
-  it('getTitleDetail routes movie to the movie endpoint with a per-title tag', async () => {
+  it('getTitleDetail appends credits, videos and images to the movie request', async () => {
     const fetchMock = respondWith(fixture('movie-detail'))
     vi.stubGlobal('fetch', fetchMock)
     const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
@@ -138,13 +138,17 @@ describe('title endpoints', () => {
 
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('/movie/27205')
+    expect(url).toContain('append_to_response=credits%2Cvideos%2Cimages')
+    expect(url).toContain('include_image_language=en%2Cnull')
     expect(init.next.tags).toContain('tmdb:title:movie:27205')
     expect(init.next.revalidate).toBe(REVALIDATE.detail)
     expect(detail.media_type).toBe('movie')
-    expect(detail).toEqual({ ...fixture('movie-detail'), media_type: 'movie' })
+    expect(detail.credits.cast.length).toBeGreaterThan(0)
+    expect(detail.images.backdrops.length).toBeGreaterThan(0)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('getTitleDetail routes tv to the tv endpoint', async () => {
+  it('getTitleDetail makes the same single appended request for tv', async () => {
     const fetchMock = respondWith(fixture('tv-detail'))
     vi.stubGlobal('fetch', fetchMock)
     const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
@@ -153,8 +157,10 @@ describe('title endpoints', () => {
 
     const [url] = fetchMock.mock.calls[0]!
     expect(url).toContain('/tv/1396')
+    expect(url).toContain('append_to_response=credits%2Cvideos%2Cimages')
     expect(detail.media_type).toBe('tv')
     expect(detail).toEqual({ ...fixture('tv-detail'), media_type: 'tv' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
 

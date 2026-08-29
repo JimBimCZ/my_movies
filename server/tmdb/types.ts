@@ -70,6 +70,7 @@ export type SearchResultItem = TrendingItem | PersonSearchResult
 export interface MovieDetail {
   adult: boolean
   backdrop_path: string | null
+  budget: number
   genres: Genre[]
   homepage: string
   id: number
@@ -80,7 +81,9 @@ export interface MovieDetail {
   overview: string
   popularity: number
   poster_path: string | null
+  production_companies: ProductionCompany[]
   release_date: string
+  revenue: number
   runtime: number
   softcore: boolean
   status: string
@@ -94,6 +97,7 @@ export interface MovieDetail {
 export interface TvDetail {
   adult: boolean
   backdrop_path: string | null
+  created_by: Creator[]
   episode_run_time: number[]
   first_air_date: string
   genres: Genre[]
@@ -103,6 +107,7 @@ export interface TvDetail {
   languages: string[]
   last_air_date: string | null
   name: string
+  networks: Network[]
   number_of_episodes: number | null
   number_of_seasons: number
   origin_country: string[]
@@ -118,6 +123,102 @@ export interface TvDetail {
   vote_average: number
   vote_count: number
 }
+
+export interface ProductionCompany {
+  id: number
+  logo_path: string | null
+  name: string
+  origin_country: string
+}
+
+export interface Network {
+  id: number
+  logo_path: string | null
+  name: string
+  origin_country: string
+}
+
+export interface Creator {
+  credit_id: string
+  gender: number
+  id: number
+  name: string
+  original_name: string
+  profile_path: string | null
+}
+
+export interface CastMember {
+  adult: boolean
+  cast_id: number
+  gender: number
+  id: number
+  known_for_department: string
+  name: string
+  original_name: string
+  popularity: number
+  profile_path: string | null
+  character: string
+  credit_id: string
+  order: number
+}
+
+export interface CrewMember {
+  adult: boolean
+  gender: number
+  id: number
+  known_for_department: string
+  name: string
+  original_name: string
+  popularity: number
+  profile_path: string | null
+  credit_id: string
+  department: string
+  job: string
+}
+
+export interface Credits {
+  cast: CastMember[]
+  crew: CrewMember[]
+}
+
+export interface Video {
+  id: string
+  iso_639_1: string
+  iso_3166_1: string
+  key: string
+  name: string
+  official: boolean
+  published_at: string
+  site: string
+  size: number
+  type: string
+}
+
+export interface ImageAsset {
+  aspect_ratio: number
+  file_path: string
+  height: number
+  iso_639_1: string | null
+  iso_3166_1: string | null
+  vote_average: number
+  vote_count: number
+  width: number
+}
+
+export interface TitleImages {
+  backdrops: ImageAsset[]
+  logos: ImageAsset[]
+  posters: ImageAsset[]
+}
+
+export interface AppendedTitleData {
+  credits: Credits
+  videos: { results: Video[] }
+  images: TitleImages
+}
+
+export type MovieDetailFull = MovieDetail & AppendedTitleData
+export type TvDetailFull = TvDetail & AppendedTitleData
 
 export interface TmdbConfiguration {
   images: {
