@@ -30,6 +30,12 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm build
+      # next.config.ts sets output: 'standalone' except on Vercel, so the build above never
+      # compiles the config Vercel actually runs. Preview deployments used to cover that gap;
+      # they are disabled, so this step does.
+      - run: pnpm build
+        env:
+          VERCEL: '1'
       - run: pnpm test
 
   db:
