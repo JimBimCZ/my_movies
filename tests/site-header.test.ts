@@ -6,7 +6,7 @@ const header = () => readFileSync('components/site-header.tsx', 'utf8')
 describe('site header', () => {
   it('reads the session on the server', () => {
     expect(header()).toContain("from '@/server/auth/config'")
-    expect(header()).toContain('auth()')
+    expect(header()).toMatch(/await\b[^\n]*\bauth\(\)/)
   })
 
   it('is not a client component', () => {
@@ -40,7 +40,7 @@ describe('site header', () => {
   it('fetches the merged genre list on the server and hands it to the menu', () => {
     const code = header()
     expect(code).toContain("from '@/server/tmdb/endpoints/genres'")
-    expect(code).toContain('getMergedGenres()')
+    expect(code).toMatch(/await\b[^\n]*\bgetMergedGenres\(\)/)
     expect(code).toMatch(/<GenresMenu genres=\{genres\} \/>/)
   })
 })

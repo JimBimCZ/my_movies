@@ -33,8 +33,12 @@ export function GenresMenu({ genres }: { genres: MergedGenre[] }) {
     <div
       ref={containerRef}
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onPointerEnter={(event) => {
+        if (event.pointerType === 'mouse') setOpen(true)
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === 'mouse') setOpen(false)
+      }}
       onKeyDown={onKeyDown}
       onBlur={onBlur}
     >

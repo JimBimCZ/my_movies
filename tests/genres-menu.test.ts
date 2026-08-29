@@ -11,8 +11,8 @@ describe('genres menu', () => {
   it('opens on hover and on click, not on hover alone', () => {
     // A hover-only menu is unreachable by keyboard and unusable on touch.
     const code = menu()
-    expect(code).toContain('onMouseEnter')
-    expect(code).toContain('onClick')
+    expect(code).toMatch(/onPointerEnter|onMouseEnter/)
+    expect(code).toMatch(/aria-expanded=\{open\}[\s\S]{0,200}onClick/)
   })
 
   it('announces its state to assistive technology', () => {
@@ -24,11 +24,11 @@ describe('genres menu', () => {
   it('closes on Escape and returns focus to the trigger', () => {
     const code = menu()
     expect(code).toContain("'Escape'")
-    expect(code).toMatch(/\.focus\(\)/)
+    expect(code).toMatch(/triggerRef\.current\?\.focus\(\)/)
   })
 
   it('closes when focus leaves the menu entirely', () => {
-    expect(menu()).toContain('relatedTarget')
+    expect(menu()).toMatch(/contains\(event\.relatedTarget\)/)
   })
 
   it('hides the panel from the tree when closed, rather than only visually', () => {
