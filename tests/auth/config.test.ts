@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { projectSession } from '@/server/auth/config'
+import { projectSession } from '@/server/auth/session'
 
 describe('auth config', () => {
   it('imports without a DATABASE_URL', async () => {
