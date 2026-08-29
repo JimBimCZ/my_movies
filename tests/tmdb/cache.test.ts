@@ -34,6 +34,15 @@ describe('isKnownTag', () => {
     expect(isKnownTag('tmdb:list:')).toBe(false)
   })
 
+  it('accepts the tv genre list tag', () => {
+    expect(isKnownTag(tags.list('tv-genre-10765'))).toBe(true)
+  })
+
+  it('still rejects a malformed tv genre tag', () => {
+    expect(isKnownTag('tmdb:list:tv-genre-')).toBe(false)
+    expect(isKnownTag('tmdb:list:tv-genre-abc')).toBe(false)
+  })
+
   it('rejects a detail tag with a bad media type or id', () => {
     expect(isKnownTag('tmdb:title:person:31')).toBe(false)
     expect(isKnownTag('tmdb:title:movie:')).toBe(false)

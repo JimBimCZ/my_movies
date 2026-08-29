@@ -1,0 +1,472 @@
+{
+    "page": 1,
+    "results": [
+        {
+            "adult": false,
+            "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
+            "genre_ids": [
+                10765,
+                18
+            ],
+            "id": 125988,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Silo",
+            "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
+            "popularity": 279.601,
+            "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+            "first_air_date": "2023-05-04",
+            "softcore": false,
+            "name": "Silo",
+            "vote_average": 8.19,
+            "vote_count": 2513
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/mdbWfpbWhvxgG3k5MHpo90UgAUe.jpg",
+            "genre_ids": [
+                18,
+                9648,
+                10765
+            ],
+            "id": 95350,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Lanterns",
+            "overview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
+            "popularity": 247.9363,
+            "poster_path": "/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
+            "first_air_date": "2026-08-16",
+            "softcore": false,
+            "name": "Lanterns",
+            "vote_average": 8.2,
+            "vote_count": 182
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/ro0tlgnsco4SwbdAgmscLkSlMSL.jpg",
+            "genre_ids": [
+                18,
+                9648,
+                10765
+            ],
+            "id": 1622,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Supernatural",
+            "overview": "When they were boys, Sam and Dean Winchester lost their mother to a mysterious and demonic supernatural force. Subsequently, their father raised them to be soldiers. He taught them about the paranormal evil that lives in the dark corners and on the back roads of America ... and he taught them how to kill it. Now, the Winchester brothers crisscross the country in their '67 Chevy Impala, battling every kind of supernatural threat they encounter along the way. ",
+            "popularity": 207.0591,
+            "poster_path": "/8iixmfGx5EIFPdpNvB2JvI3VIqX.jpg",
+            "first_air_date": "2005-09-13",
+            "softcore": false,
+            "name": "Supernatural",
+            "vote_average": 8.3,
+            "vote_count": 8628
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/577eXC8wFQT0eUrJcgznSiFPRmk.jpg",
+            "genre_ids": [
+                10765,
+                18,
+                10759
+            ],
+            "id": 94997,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "House of the Dragon",
+            "overview": "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights. In the case of the Targaryens, their slow fall begins when King Viserys breaks with a century of tradition by naming his daughter Rhaenyra heir to the Iron Throne. But when Viserys later fathers a son, the court is shocked when Rhaenyra retains her status as his heir, and seeds of division sow friction across the realm.",
+            "popularity": 177.6773,
+            "poster_path": "/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
+            "first_air_date": "2022-08-21",
+            "softcore": false,
+            "name": "House of the Dragon",
+            "vote_average": 8.4,
+            "vote_count": 7058
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/iFOkrSrJRwE27PwbyQeYLlMJXzw.jpg",
+            "genre_ids": [
+                16,
+                35,
+                10765,
+                10759
+            ],
+            "id": 60625,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Rick and Morty",
+            "overview": "Follows a sociopathic genius scientist who drags his inherently timid grandson on adventures across the universe.",
+            "popularity": 176.9841,
+            "poster_path": "/owhkU6KRqdXoUQpjV8uyZGPtX58.jpg",
+            "first_air_date": "2013-12-02",
+            "softcore": false,
+            "name": "Rick and Morty",
+            "vote_average": 8.682,
+            "vote_count": 11330
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg",
+            "genre_ids": [
+                10765,
+                18,
+                10759
+            ],
+            "id": 1399,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Game of Thrones",
+            "overview": "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and icy horrors beyond.",
+            "popularity": 166.2957,
+            "poster_path": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+            "first_air_date": "2011-04-17",
+            "softcore": false,
+            "name": "Game of Thrones",
+            "vote_average": 8.47,
+            "vote_count": 27613
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/rAOjnEFTuNysY7bot8zonhImGMh.jpg",
+            "genre_ids": [
+                10759,
+                18,
+                10765
+            ],
+            "id": 1402,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "The Walking Dead",
+            "overview": "Sheriff's deputy Rick Grimes awakens from a coma to find a post-apocalyptic world dominated by flesh-eating zombies. He sets out to find his family and encounters many other survivors along the way.",
+            "popularity": 163.8208,
+            "poster_path": "/ng3cMtxYKt1OSQYqFlnKWnVsqNO.jpg",
+            "first_air_date": "2010-10-31",
+            "softcore": false,
+            "name": "The Walking Dead",
+            "vote_average": 8.083,
+            "vote_count": 18133
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/usLRh1bcbL0Q9X8zf6rL4OV1qrA.jpg",
+            "genre_ids": [
+                10759,
+                10765,
+                18
+            ],
+            "id": 2661,
+            "origin_country": [
+                "JP"
+            ],
+            "original_language": "ja",
+            "original_name": "\u4eee\u9762\u30e9\u30a4\u30c0\u30fc",
+            "overview": "Takeshi Hongo is a promising young man with a passion for motorcycle racing. However, his dreams are suddenly ruined when he gets kidnapped by Shocker, the evil secret organization planning to dominate the world. After being remodeled into a cyborg, Takeshi escapes and swears to protect the world from the inhuman monsters.",
+            "popularity": 163.3583,
+            "poster_path": "/2DIBDFHiKQawz4WPsYekl9DHwyA.jpg",
+            "first_air_date": "1971-04-03",
+            "softcore": false,
+            "name": "Kamen Rider",
+            "vote_average": 6.4,
+            "vote_count": 105
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/xLdw1xdHocKYFFvx7w41NchXMfJ.jpg",
+            "genre_ids": [
+                9648,
+                18,
+                10765
+            ],
+            "id": 124364,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "FROM",
+            "overview": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and search for a way out, they must also survive the threats of the surrounding forest \u2013 including the terrifying creatures that come out when the sun goes down.",
+            "popularity": 146.6245,
+            "poster_path": "/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
+            "first_air_date": "2022-02-20",
+            "softcore": false,
+            "name": "FROM",
+            "vote_average": 8.494,
+            "vote_count": 4215
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/j9fRIimor0AMFJR9kjZubXcABzZ.jpg",
+            "genre_ids": [
+                10759,
+                16,
+                10765
+            ],
+            "id": 94664,
+            "origin_country": [
+                "JP"
+            ],
+            "original_language": "ja",
+            "original_name": "\u7121\u8077\u8ee2\u751f \uff5e\u7570\u4e16\u754c\u884c\u3063\u305f\u3089\u672c\u6c17\u3060\u3059\uff5e",
+            "overview": "When a 34-year-old underachiever gets run over by a truck, his story doesn't end there. Reincarnated in a new world as an infant, Rudy will seize every opportunity to live the life he's always wanted. Armed with new friends, some freshly acquired magical abilities, and the courage to do the things he's always dreamed of, he's embarking on an epic adventure\u2014with all of his past experience intact!",
+            "popularity": 136.466,
+            "poster_path": "/gLKOYIMyKlUHW0SVdskhgf9C0yy.jpg",
+            "first_air_date": "2021-01-11",
+            "softcore": false,
+            "name": "Mushoku Tensei: Jobless Reincarnation",
+            "vote_average": 8.4,
+            "vote_count": 1690
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/bhF63Jd90gRYyTHd4y5GCGA2vX6.jpg",
+            "genre_ids": [
+                16,
+                35,
+                10759,
+                10765
+            ],
+            "id": 31132,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Regular Show",
+            "overview": "The surreal misadventures of two best friends - a blue jay and a raccoon - as they seek to liven up their mundane jobs as groundskeepers at the local park.",
+            "popularity": 135.377,
+            "poster_path": "/mS5SLxMYcKfUxA0utBSR5MOAWWr.jpg",
+            "first_air_date": "2010-09-06",
+            "softcore": false,
+            "name": "Regular Show",
+            "vote_average": 8.637,
+            "vote_count": 2303
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/4wVq9ICc4MI2XcssrumpCOhKLpI.jpg",
+            "genre_ids": [
+                10765,
+                10759,
+                18
+            ],
+            "id": 4604,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Smallville",
+            "overview": "The origins of the world\u2019s greatest hero\u2013from Krypton refugee Kal-el\u2019s arrival on Earth through his tumultuous teen years to Clark Kent\u2019s final steps toward embracing his destiny as the Man of Steel.",
+            "popularity": 129.9398,
+            "poster_path": "/mHZSq8LA5Dt48JjaOZ5tcPXQRVN.jpg",
+            "first_air_date": "2001-10-16",
+            "softcore": false,
+            "name": "Smallville",
+            "vote_average": 8.192,
+            "vote_count": 4571
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/bIHCUqaapZdRjd2kzSDiwzYyrpC.jpg",
+            "genre_ids": [
+                16,
+                10759,
+                35,
+                10751,
+                10765
+            ],
+            "id": 45140,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Teen Titans Go!",
+            "overview": "Robin, Starfire, Raven, Beast Boy and Cyborg return in all-new, comedic adventures. They may be super heroes who save the world every day ... but somebody still has to do the laundry!",
+            "popularity": 129.5172,
+            "poster_path": "/kPKAigYUlWRpnfo4Ptiwlz4FWXU.jpg",
+            "first_air_date": "2013-04-23",
+            "softcore": false,
+            "name": "Teen Titans Go!",
+            "vote_average": 6.4,
+            "vote_count": 722
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+            "genre_ids": [
+                10759,
+                16,
+                10765
+            ],
+            "id": 30984,
+            "origin_country": [
+                "JP"
+            ],
+            "original_language": "ja",
+            "original_name": "BLEACH",
+            "overview": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
+            "popularity": 127.3732,
+            "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+            "first_air_date": "2004-10-05",
+            "softcore": false,
+            "name": "Bleach",
+            "vote_average": 8.366,
+            "vote_count": 2243
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/c2oiRa7V3bQzof4wVGzLXtWJ5QU.jpg",
+            "genre_ids": [
+                10759,
+                16,
+                35,
+                10765,
+                10762,
+                10751
+            ],
+            "id": 65733,
+            "origin_country": [
+                "JP"
+            ],
+            "original_language": "ja",
+            "original_name": "\u30c9\u30e9\u3048\u3082\u3093",
+            "overview": "Robotic cat Doraemon is sent back in time from the 22nd century to protect 10-year-old Noby, a lazy and uncoordinated boy who is destined to have a tragic future. Doraemon can create secret gadgets from a pocket on his stomach, but they usually cause more bad than good because of Noby's propensity to misuse them.",
+            "popularity": 127.1496,
+            "poster_path": "/9ZN1P32SHviL3SV51qLivxycvcx.jpg",
+            "first_air_date": "2005-04-22",
+            "softcore": false,
+            "name": "Doraemon",
+            "vote_average": 8.1,
+            "vote_count": 239
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/4xKG4S1IyLIglHbCYGJDsptgQNh.jpg",
+            "genre_ids": [
+                16,
+                35,
+                10765
+            ],
+            "id": 615,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Futurama",
+            "overview": "The adventures of a late-20th-century New York City pizza delivery boy, Philip J. Fry, who, after being unwittingly cryogenically frozen for one thousand years, finds employment at Planet Express, an interplanetary delivery company in the retro-futuristic 31st century.",
+            "popularity": 122.902,
+            "poster_path": "/eM8bbTn8C8vUwwS6upzzm7gX31u.jpg",
+            "first_air_date": "1999-03-28",
+            "softcore": false,
+            "name": "Futurama",
+            "vote_average": 8.365,
+            "vote_count": 3874
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+            "genre_ids": [
+                10759,
+                9648,
+                10765
+            ],
+            "id": 66732,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Stranger Things",
+            "overview": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
+            "popularity": 113.3841,
+            "poster_path": "/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+            "first_air_date": "2016-07-15",
+            "softcore": false,
+            "name": "Stranger Things",
+            "vote_average": 8.554,
+            "vote_count": 21734
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/7I4sDpcoFD21NRshrml3cWJCHIK.jpg",
+            "genre_ids": [
+                99,
+                10765,
+                9648
+            ],
+            "id": 69536,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Cosmic Disclosure",
+            "overview": "For the first time ever, a 30-year insider has come forward to reveal over 70 years of humanity's hidden history in space. Corey Goode joins David Wilcock in this inaugural presentation of Cosmic Disclosure to offer an overview of the history and extent of humanity's celestial presence.",
+            "popularity": 113.1317,
+            "poster_path": "/99V7vkV0E3SFRxlAb45iNePLePz.jpg",
+            "first_air_date": "2015-07-14",
+            "softcore": false,
+            "name": "Cosmic Disclosure",
+            "vote_average": 10.0,
+            "vote_count": 2
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/n6vVs6z8obNbExdD3QHTr4Utu1Z.jpg",
+            "genre_ids": [
+                10765,
+                10759
+            ],
+            "id": 76479,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "The Boys",
+            "overview": "A group of vigilantes known informally as \u201cThe Boys\u201d set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+            "popularity": 110.0238,
+            "poster_path": "/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+            "first_air_date": "2019-07-25",
+            "softcore": false,
+            "name": "The Boys",
+            "vote_average": 8.435,
+            "vote_count": 13343
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/pe4B3OYBb7qYCdkAz7nKWordbls.jpg",
+            "genre_ids": [
+                16,
+                35,
+                10765
+            ],
+            "id": 15260,
+            "origin_country": [
+                "US"
+            ],
+            "original_language": "en",
+            "original_name": "Adventure Time",
+            "overview": "Young Finn and his shape-shifting dog buddy, Jake, go on a series of surreal adventures as they journey through the postapocalyptic Land of Ooo.",
+            "popularity": 109.8649,
+            "poster_path": "/qk3eQ8jW4opJ48gFWYUXWaMT4l.jpg",
+            "first_air_date": "2010-04-05",
+            "softcore": false,
+            "name": "Adventure Time",
+            "vote_average": 8.508,
+            "vote_count": 3190
+        }
+    ],
+    "total_pages": 466,
+    "total_results": 9318
+}

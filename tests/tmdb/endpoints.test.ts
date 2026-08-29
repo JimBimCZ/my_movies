@@ -120,6 +120,35 @@ describe('list endpoints', () => {
 
     expect(results[0]!.media_type).toBe('movie')
   })
+
+  it('getTvGenres reads the tv list and shares the genres tag', async () => {
+    const fetchMock = respondWith(fixture('genres-tv'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { getTvGenres } = await import('@/server/tmdb/endpoints/lists')
+
+    const genres = await getTvGenres()
+
+    const [url, init] = fetchMock.mock.calls[0]!
+    expect(url).toContain('/genre/tv/list')
+    expect(init.next.tags).toContain(tags.genres)
+    expect(init.next.revalidate).toBe(REVALIDATE.genres)
+    expect(genres.some((genre) => genre.name === 'Action & Adventure')).toBe(true)
+  })
+
+  it('discoverTvByGenre filters on the tv genre and tags its own list', async () => {
+    const fetchMock = respondWith(fixture('discover-tv'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { discoverTvByGenre } = await import('@/server/tmdb/endpoints/lists')
+
+    const results = await discoverTvByGenre(10765)
+
+    const [url, init] = fetchMock.mock.calls[0]!
+    expect(url).toContain('/discover/tv')
+    expect(url).toContain('with_genres=10765')
+    expect(init.next.tags).toContain(tags.list('tv-genre-10765'))
+    expect(results[0]!.media_type).toBe('tv')
+    expect(results[0]).toHaveProperty('name')
+  })
 })
 
 describe('title endpoints', () => {
