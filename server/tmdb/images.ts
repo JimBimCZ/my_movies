@@ -3,7 +3,8 @@ import { REVALIDATE, tags } from './cache'
 import type { TmdbConfiguration } from './types'
 
 export const POSTER_SLOTS = { card: 342, detail: 500 } as const
-export const BACKDROP_SLOTS = { hero: 1280 } as const
+export const BACKDROP_SLOTS = { hero: 1280, still: 780 } as const
+export const PROFILE_SLOTS = { card: 185 } as const
 
 export function pickSize(available: string[], target: number): string {
   const widths = available

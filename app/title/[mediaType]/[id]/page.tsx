@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { CastRow } from '@/components/cast-row'
 import { TitleFacts } from '@/components/title-facts'
 import { WatchlistButton } from '@/components/watchlist-button'
 import { auth } from '@/server/auth/config'
@@ -9,7 +10,9 @@ import { getTitleDetail } from '@/server/tmdb/endpoints/titles'
 import { BACKDROP_SLOTS, POSTER_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/server/tmdb/images'
 import { isInWatchlist } from '@/server/watchlist/queries'
 import { parseMediaType, parseTmdbId } from '@/lib/route-params'
-import { toTitleFacts } from '@/lib/title-detail'
+import { pickCast, toTitleFacts } from '@/lib/title-detail'
+
+const CAST_LIMIT = 10
 
 export async function generateMetadata({
   params,
@@ -103,6 +106,10 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
             />
           </div>
         </div>
+      </div>
+
+      <div className="mt-12">
+        <CastRow cast={pickCast(detail.credits, CAST_LIMIT)} />
       </div>
     </main>
   )

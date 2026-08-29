@@ -45,4 +45,48 @@ describe('title detail page', () => {
   it('shows the tagline only when the payload has one', () => {
     expect(page()).toMatch(/detail\.tagline &&/)
   })
+
+  it('does not re-add an inline rating beside the title', () => {
+    // Task 5 moved the rating into the facts list; an inline vote_average here would
+    // duplicate it.
+    expect(page()).not.toContain('vote_average')
+  })
+
+  it('orders the details column: genres, facts, tagline, overview', () => {
+    // Anchored on the JSX forms: bare `detail.overview` also matches generateMetadata's
+    // description, which sits above all of this in the file.
+    const code = page()
+    const genres = code.indexOf('{detail.genres.map')
+    const facts = code.indexOf('<TitleFacts')
+    const tagline = code.indexOf('{detail.tagline &&')
+    const overview = code.indexOf('{detail.overview}')
+    expect(genres).toBeGreaterThan(-1)
+    expect(genres).toBeLessThan(facts)
+    expect(facts).toBeLessThan(tagline)
+    expect(tagline).toBeLessThan(overview)
+  })
+})
+
+const castRow = () => readFileSync('components/cast-row.tsx', 'utf8')
+
+describe('cast row', () => {
+  it('is a server component that reuses the shared scroller', () => {
+    const code = castRow()
+    expect(code).not.toMatch(/["']use client["']/)
+    expect(code).toContain('RowScroller')
+  })
+
+  it('names both the actor and the character', () => {
+    const code = castRow()
+    expect(code).toContain('member.name')
+    expect(code).toContain('member.character')
+  })
+
+  it('gives every profile image alt text naming the actor', () => {
+    expect(castRow()).toMatch(/alt=\{member\.name\}/)
+  })
+
+  it('renders nothing for a title with no cast', () => {
+    expect(castRow()).toMatch(/cast\.length === 0/)
+  })
 })
