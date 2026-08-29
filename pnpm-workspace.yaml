@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+  # eslint-only, and its binding comes from the platform optionalDependency — the postinstall
+  # has been skipped since day one and lint passes without it.
+  unrs-resolver: false
