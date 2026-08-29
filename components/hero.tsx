@@ -26,7 +26,7 @@ export async function Hero({ item }: { item: TrendingItem }) {
           href={`/title/${card.mediaType}/${card.id}`}
           className="mt-5 inline-block rounded bg-white px-5 py-2 font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          More info
+          More info<span className="sr-only"> about {card.title}</span>
         </Link>
       </div>
     </section>
