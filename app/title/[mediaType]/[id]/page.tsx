@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { TitleFacts } from '@/components/title-facts'
 import { WatchlistButton } from '@/components/watchlist-button'
 import { auth } from '@/server/auth/config'
 import { TmdbError } from '@/server/tmdb/client'
@@ -8,6 +9,7 @@ import { getTitleDetail } from '@/server/tmdb/endpoints/titles'
 import { BACKDROP_SLOTS, POSTER_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/server/tmdb/images'
 import { isInWatchlist } from '@/server/watchlist/queries'
 import { parseMediaType, parseTmdbId } from '@/lib/route-params'
+import { toTitleFacts } from '@/lib/title-detail'
 
 export async function generateMetadata({
   params,
@@ -45,8 +47,6 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
   const userId = session?.user?.id
   const inWatchlist = userId ? await isInWatchlist(userId, id, mediaType) : false
   const title = detail.media_type === 'movie' ? detail.title : detail.name
-  const releaseDate = detail.media_type === 'movie' ? detail.release_date : detail.first_air_date
-  const releaseYear = releaseDate ? releaseDate.slice(0, 4) : null
   const poster = buildImageUrl(
     images.secure_base_url,
     pickSize(images.poster_sizes, POSTER_SLOTS.detail),
@@ -57,6 +57,7 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
     pickSize(images.backdrop_sizes, BACKDROP_SLOTS.hero),
     detail.backdrop_path,
   )
+  const facts = toTitleFacts(detail)
 
   return (
     <main>
@@ -80,10 +81,6 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
         )}
         <div className="pt-4">
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            {releaseYear && `${releaseYear} · `}
-            {detail.vote_average.toFixed(1)} / 10
-          </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {detail.genres.map((genre) => (
               <li key={genre.id} className="rounded-full border border-white/15 px-3 py-1 text-xs">
@@ -91,7 +88,11 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
               </li>
             ))}
           </ul>
-          <p className="mt-5 max-w-2xl leading-relaxed">{detail.overview}</p>
+          <TitleFacts facts={facts} />
+          {detail.tagline && (
+            <p className="mt-5 text-lg italic text-[var(--muted)]">{detail.tagline}</p>
+          )}
+          <p className="mt-3 max-w-2xl leading-relaxed">{detail.overview}</p>
           <div className="mt-6">
             <WatchlistButton
               tmdbId={id}
