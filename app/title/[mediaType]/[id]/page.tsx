@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { CastRow } from '@/components/cast-row'
 import { TitleFacts } from '@/components/title-facts'
+import { TrailerPlayer } from '@/components/trailer-player'
 import { WatchlistButton } from '@/components/watchlist-button'
 import { auth } from '@/server/auth/config'
 import { TmdbError } from '@/server/tmdb/client'
@@ -10,7 +11,7 @@ import { getTitleDetail } from '@/server/tmdb/endpoints/titles'
 import { BACKDROP_SLOTS, POSTER_SLOTS, buildImageUrl, getImageConfig, pickSize } from '@/server/tmdb/images'
 import { isInWatchlist } from '@/server/watchlist/queries'
 import { parseMediaType, parseTmdbId } from '@/lib/route-params'
-import { pickCast, toTitleFacts } from '@/lib/title-detail'
+import { pickCast, pickTrailer, toTitleFacts } from '@/lib/title-detail'
 
 const CAST_LIMIT = 10
 
@@ -61,6 +62,12 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
     detail.backdrop_path,
   )
   const facts = toTitleFacts(detail)
+  const trailer = pickTrailer(detail.videos.results)
+  const still = buildImageUrl(
+    images.secure_base_url,
+    pickSize(images.backdrop_sizes, BACKDROP_SLOTS.still),
+    detail.backdrop_path,
+  )
 
   return (
     <main>
@@ -107,6 +114,15 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
           </div>
         </div>
       </div>
+
+      {trailer && (
+        <section className="mx-auto mt-12 max-w-5xl px-6" aria-labelledby="trailer-heading">
+          <h2 id="trailer-heading" className="mb-3 text-lg font-semibold">
+            Trailer
+          </h2>
+          <TrailerPlayer youtubeKey={trailer.key} title={title} thumbnail={still} />
+        </section>
+      )}
 
       <div className="mt-12">
         <CastRow cast={pickCast(detail.credits, CAST_LIMIT)} />
