@@ -22,4 +22,18 @@ describe('site header', () => {
     expect(header()).toContain('href="/watchlist"')
     expect(header()).toMatch(/session \? \(\s*<Link\s+href="\/watchlist"/)
   })
+
+  it('scrims deeply enough to carry the nav over a bright backdrop', () => {
+    const code = header()
+    expect(code).toContain('from-black/90')
+    expect(code).toContain('via-black/60')
+  })
+
+  it('does not put any header text on the muted colour', () => {
+    // --muted is #9b9ba3. Over a bright backdrop with only a partial scrim it does not
+    // reach 4.5:1, and every link, the sign-out button and the session name sat on it.
+    // Asserted file-wide: three of the five inherit text-sm from an ancestor, so a
+    // filter keyed on that class would not see them regress.
+    expect(header()).not.toContain('text-[var(--muted)]')
+  })
 })

@@ -67,7 +67,7 @@ export default async function TitlePage({ params }: PageProps<'/title/[mediaType
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] to-transparent" />
       </div>
 
-      <div className="mx-auto -mt-24 flex max-w-5xl flex-col gap-8 px-6 md:flex-row">
+      <div className="relative z-10 mx-auto -mt-24 flex max-w-5xl flex-col gap-8 px-6 md:flex-row">
         {poster && (
           <Image
             src={poster}
