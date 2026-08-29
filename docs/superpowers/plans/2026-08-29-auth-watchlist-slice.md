@@ -368,6 +368,28 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', 'db'])
+
+function assertLocal(url: string) {
+  let host: string
+  try {
+    host = new URL(url).hostname.replace(/^\[|\]$/g, '')
+  } catch {
+    throw new Error(
+      'DATABASE_URL is not a parseable URL, so its host cannot be checked. The integration ' +
+        'suite truncates tables, so it only runs against a local database.',
+    )
+  }
+  if (!LOCAL_HOSTS.has(host)) {
+    throw new Error(
+      `Refusing to run the integration suite against host "${host}". This suite truncates ` +
+        `watchlist_items and users, so it only runs against a local database ` +
+        `(${[...LOCAL_HOSTS].join(', ')}). Run \`pnpm test:db\`, which supplies a local ` +
+        `DATABASE_URL, instead of relying on whatever is exported in your shell.`,
+    )
+  }
+}
+
 export default async function setup() {
   const url = process.env.DATABASE_URL
   if (!url) {
@@ -377,6 +399,7 @@ export default async function setup() {
         'which supplies it.',
     )
   }
+  assertLocal(url)
 
   const pool = new Pool({ connectionString: url })
   try {
@@ -390,6 +413,8 @@ export default async function setup() {
 Failing loudly on a missing variable is deliberate: a suite that silently skips when the database is absent reports green while proving nothing.
 
 The variable is `DATABASE_URL` — the same one `getDb()` reads — and there is deliberately no second `TEST_DATABASE_URL`. The harness and the code under test must resolve to the same database, and two variables can diverge: with a separate `TEST_DATABASE_URL` set and a real `DATABASE_URL` exported in the shell, `setup.ts` migrates the test database while `beforeEach` truncates whatever `DATABASE_URL` points at. That is silent data loss, and it only shows up when someone runs `vitest --config vitest.db.config.ts` directly instead of through `pnpm test:db` — the obvious move when iterating on one failing test. One variable cannot diverge from itself. Do not reintroduce a dedicated test variable for clarity; the clarity is not worth the failure mode.
+
+Sharing the variable with the application does mean a production `DATABASE_URL` exported in a shell would be migrated and truncated by a direct `vitest --config vitest.db.config.ts` run, so `setup.ts` also refuses any host outside `localhost`, `127.0.0.1`, `::1` and `db` (the compose service name), and refuses a URL it cannot parse rather than falling through. The harness must not depend on being invoked correctly. There is no opt-out variable: an escape hatch is the thing that ends up exported in the shell that truncates production.
 
 - [ ] **Step 4: Add the script**
 
@@ -422,6 +447,7 @@ const ALICE = 'user-alice'
 const BOB = 'user-bob'
 
 const INTERSTELLAR = { tmdbId: 157336, mediaType: 'movie' as const, title: 'Interstellar', posterPath: '/a.jpg' }
+const INCEPTION = { tmdbId: 27205, mediaType: 'movie' as const, title: 'Inception', posterPath: '/b.jpg' }
 const SEVERANCE = { tmdbId: 95396, mediaType: 'tv' as const, title: 'Severance', posterPath: null }
 
 beforeEach(async () => {
@@ -441,9 +467,9 @@ describe('addToWatchlist', () => {
     await addToWatchlist(ALICE, INTERSTELLAR)
     const rows = await listForUser(ALICE)
     expect(rows).toHaveLength(1)
-    expect(rows[0].title).toBe('Interstellar')
-    expect(rows[0].posterPath).toBe('/a.jpg')
-    expect(rows[0].addedAt).toBeInstanceOf(Date)
+    expect(rows[0]!.title).toBe('Interstellar')
+    expect(rows[0]!.posterPath).toBe('/a.jpg')
+    expect(rows[0]!.addedAt).toBeInstanceOf(Date)
   })
 
   it('is idempotent rather than an error', async () => {
@@ -460,7 +486,7 @@ describe('addToWatchlist', () => {
 
   it('accepts a missing poster', async () => {
     await addToWatchlist(ALICE, SEVERANCE)
-    expect((await listForUser(ALICE))[0].posterPath).toBeNull()
+    expect((await listForUser(ALICE))[0]!.posterPath).toBeNull()
   })
 })
 
@@ -484,6 +510,17 @@ describe('isInWatchlist', () => {
     expect(await isInWatchlist(BOB, 157336, 'movie')).toBe(true)
     expect(await isInWatchlist(ALICE, 157336, 'movie')).toBe(false)
   })
+
+  it('answers per title, not per user', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    expect(await isInWatchlist(ALICE, 157336, 'movie')).toBe(true)
+    expect(await isInWatchlist(ALICE, 27205, 'movie')).toBe(false)
+  })
+
+  it('does not conflate media types sharing a TMDB id', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    expect(await isInWatchlist(ALICE, 157336, 'tv')).toBe(false)
+  })
 })
 
 describe('removeFromWatchlist', () => {
@@ -499,13 +536,29 @@ describe('removeFromWatchlist', () => {
     expect(await listForUser(BOB)).toHaveLength(1)
   })
 
+  it('leaves the caller other titles alone', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    await addToWatchlist(ALICE, INCEPTION)
+    await removeFromWatchlist(ALICE, 157336, 'movie')
+    expect((await listForUser(ALICE)).map((row) => row.title)).toEqual(['Inception'])
+  })
+
+  it('does not conflate media types sharing a TMDB id', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    await addToWatchlist(ALICE, { ...INTERSTELLAR, mediaType: 'tv' })
+    await removeFromWatchlist(ALICE, 157336, 'movie')
+    const rows = await listForUser(ALICE)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]!.mediaType).toBe('tv')
+  })
+
   it('is silent when there is nothing to remove', async () => {
     await expect(removeFromWatchlist(ALICE, 999999, 'movie')).resolves.toBeUndefined()
   })
 })
 ```
 
-The last test in each of the final two blocks is the one that matters: ownership is enforced in the `where` clause, and a delete that matched nothing is not an error.
+Ownership is enforced in the `where` clause, and a delete that matched nothing is not an error. The tests that vary `tmdbId` and `mediaType` while holding the user fixed are load-bearing: without them, dropping those two predicates from `owns()` leaves every other test green while removing one title wipes the user's whole watchlist. Vary one predicate at a time, so a failure names which one broke.
 
 - [ ] **Step 6: Run them and watch them fail**
 
