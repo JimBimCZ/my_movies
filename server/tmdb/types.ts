@@ -70,7 +70,6 @@ export type SearchResultItem = TrendingItem | PersonSearchResult
 export interface MovieDetail {
   adult: boolean
   backdrop_path: string | null
-  budget: number
   genres: Genre[]
   homepage: string
   id: number
@@ -83,7 +82,6 @@ export interface MovieDetail {
   poster_path: string | null
   production_companies: ProductionCompany[]
   release_date: string
-  revenue: number
   runtime: number
   softcore: boolean
   status: string

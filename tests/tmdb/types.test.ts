@@ -59,7 +59,6 @@ const TV_LIST_ITEM_KEYS = declaredKeys<TvListItem>({
 const MOVIE_DETAIL_KEYS = declaredKeys<MovieDetail>({
   adult: true,
   backdrop_path: true,
-  budget: true,
   genres: true,
   homepage: true,
   id: true,
@@ -72,7 +71,6 @@ const MOVIE_DETAIL_KEYS = declaredKeys<MovieDetail>({
   poster_path: true,
   production_companies: true,
   release_date: true,
-  revenue: true,
   runtime: true,
   softcore: true,
   status: true,
