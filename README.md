@@ -139,7 +139,16 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full conventions.
 pnpm test
 ```
 
-No test makes a network call — the TMDB response types are derived from real payloads captured into `tests/fixtures/tmdb/`. To re-capture them (needs `jq` and a working token):
+`pnpm test` is hermetic and makes no network or database calls. `pnpm test:db` runs the watchlist repository against the compose Postgres, applying the migrations first. Start that database with:
+
+```bash
+set -a; . ./.env.local; set +a
+docker compose up -d db
+```
+
+Compose interpolates the whole file, so the `app` service's token guard blocks every subcommand until the env file is sourced — see the comment on that guard in [`docker-compose.yml`](./docker-compose.yml).
+
+No test in `pnpm test` makes a network call — the TMDB response types are derived from real payloads captured into `tests/fixtures/tmdb/`. To re-capture them (needs `jq` and a working token):
 
 ```bash
 ./scripts/capture-tmdb-fixtures.sh
@@ -153,7 +162,7 @@ The TMDB client also respects a `429` with a bounded, jittered retry that honour
 
 ## Not built yet
 
-- **Sign-in and the watchlist.** No authentication, no `watchlist_items` table. The GitHub and Google OAuth apps are registered and their credentials are in place — see [docs/oauth-setup.md](docs/oauth-setup.md) — but no code reads them yet.
+- **Sign-in and the watchlist.** The schema, the first migration and the watchlist query layer are in place, and `pnpm test:db` exercises the queries against a real Postgres. There is no authentication and no UI, so nothing has yet signed a user in or written a row through the application. The GitHub and Google OAuth apps are registered and their credentials are in place — see [docs/oauth-setup.md](docs/oauth-setup.md) — but no code reads them yet.
 - **Error boundaries.** A TMDB failure currently reaches Next's default error page.
 - **Cache-tag revalidation and CI.** Responses carry cache tags, but nothing revalidates them yet, and there is no pipeline running the gate on push.
 

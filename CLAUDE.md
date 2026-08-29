@@ -85,6 +85,7 @@ pnpm build            # production build — run before claiming a change is don
 pnpm lint             # eslint
 pnpm typecheck        # tsc --noEmit
 pnpm test             # unit tests
+pnpm test:db          # watchlist integration tests; needs the compose db running
 pnpm db:generate      # generate migration from schema changes
 pnpm db:migrate       # apply migrations
 pnpm db:studio        # inspect the database

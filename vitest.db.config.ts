@@ -4,14 +4,13 @@ import path from 'node:path'
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['tests/**/*.test.ts'],
-    exclude: ['**/node_modules/**', 'tests/db-integration/**'],
+    include: ['tests/db-integration/**/*.test.ts'],
+    globalSetup: ['tests/db-integration/setup.ts'],
+    fileParallelism: false,
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
-      // The server-only package resolves to a module that throws unless the
-      // react-server export condition is active, which it is not under vitest.
       'server-only': path.resolve(__dirname, 'tests/stubs/server-only.ts'),
     },
   },
