@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { connection } from 'next/server'
 import { Hero } from '@/components/hero'
+import { HeroSkeleton } from '@/components/hero-skeleton'
 import { Row } from '@/components/row'
 import { RowSkeleton } from '@/components/row-skeleton'
 import { toCardItem } from '@/lib/media'
@@ -14,6 +15,9 @@ import {
 } from '@/server/tmdb/endpoints/lists'
 
 const FIRST_ROW_PRIORITY_COUNT = 4
+// The fallback reserves one row per genre row that will arrive; a single skeleton for all of
+// them collapsed to a quarter of the final height and shifted everything below it.
+const GENRE_ROW_COUNT = 4
 
 async function TrendingRow() {
   const items = await getTrending()
@@ -50,7 +54,7 @@ async function GenreRows() {
   const genres = await getMovieGenres()
   return (
     <>
-      {genres.slice(0, 4).map((genre) => (
+      {genres.slice(0, GENRE_ROW_COUNT).map((genre) => (
         <Suspense key={genre.id} fallback={<RowSkeleton title={genre.name} />}>
           <GenreRow id={genre.id} name={genre.name} />
         </Suspense>
@@ -74,7 +78,7 @@ export default async function HomePage() {
 
   return (
     <main>
-      <Suspense fallback={<div className="mb-8 h-[60vh] min-h-[380px] animate-pulse bg-white/5" />}>
+      <Suspense fallback={<HeroSkeleton />}>
         <HomeHero />
       </Suspense>
       <Suspense fallback={<RowSkeleton title="Trending this week" />}>
@@ -89,7 +93,15 @@ export default async function HomePage() {
       <Suspense fallback={<RowSkeleton title="Airing today" />}>
         <AiringTodayRow />
       </Suspense>
-      <Suspense fallback={<RowSkeleton title="By genre" />}>
+      <Suspense
+        fallback={
+          <>
+            {Array.from({ length: GENRE_ROW_COUNT }).map((_, index) => (
+              <RowSkeleton key={index} />
+            ))}
+          </>
+        }
+      >
         <GenreRows />
       </Suspense>
     </main>

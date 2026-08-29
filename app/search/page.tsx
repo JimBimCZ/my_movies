@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { PosterCard } from '@/components/poster-card'
 import { SearchInput } from '@/components/search-input'
+import { SearchInputSkeleton } from '@/components/search-input-skeleton'
 import { toCardItem } from '@/lib/media'
 import { searchMulti } from '@/server/tmdb/endpoints/search'
 import { getImageConfig } from '@/server/tmdb/images'
@@ -53,7 +54,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
   return (
     <main>
       <h1 className="mx-auto max-w-2xl px-6 pt-8 text-2xl font-bold tracking-tight">Search</h1>
-      <Suspense>
+      <Suspense fallback={<SearchInputSkeleton />}>
         <SearchInput />
       </Suspense>
       {/* The live region is outside the boundary so it survives the swap: the skeleton
