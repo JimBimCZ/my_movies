@@ -109,6 +109,14 @@ describe('pickTrailer', () => {
     expect(chosen?.key).toBe('official')
   })
 
+  it('prefers an unofficial trailer over an official teaser', () => {
+    const chosen = pickTrailer([
+      video({ key: 'teaser', type: 'Teaser', official: true, published_at: '2024-01-01T00:00:00.000Z' }),
+      video({ key: 'trailer', type: 'Trailer', official: false, published_at: '2010-01-01T00:00:00.000Z' }),
+    ])
+    expect(chosen?.key).toBe('trailer')
+  })
+
   it('ignores anything not hosted on YouTube', () => {
     expect(pickTrailer([video({ site: 'Vimeo' })])).toBeNull()
   })
@@ -120,7 +128,8 @@ describe('pickTrailer', () => {
 
 describe('pickCast', () => {
   it('takes the top billing in order', () => {
-    const cast = pickCast(movie().credits, 3)
+    const reversed = { ...movie().credits, cast: [...movie().credits.cast].reverse() }
+    const cast = pickCast(reversed, 3)
     expect(cast).toHaveLength(3)
     expect(cast[0]!.order).toBe(0)
     expect(cast[0]!.name).toBe('Leonardo DiCaprio')
@@ -133,14 +142,15 @@ describe('pickCast', () => {
 
 describe('pickBackdrops', () => {
   it('puts the best-voted backdrop first and honours the limit', () => {
-    const picked = pickBackdrops(movie().images, 3)
+    const images = { ...movie().images, backdrops: [...movie().images.backdrops].reverse() }
+    const picked = pickBackdrops(images, 3)
     expect(picked).toHaveLength(3)
     expect(picked[0]!.vote_average).toBeGreaterThanOrEqual(picked[1]!.vote_average)
     expect(picked[1]!.vote_average).toBeGreaterThanOrEqual(picked[2]!.vote_average)
   })
 
   it('does not mutate the payload it was handed', () => {
-    const images = movie().images
+    const images = { ...movie().images, backdrops: [...movie().images.backdrops].reverse() }
     const before = images.backdrops.map((asset) => asset.file_path)
     pickBackdrops(images, 3)
     expect(images.backdrops.map((asset) => asset.file_path)).toEqual(before)
