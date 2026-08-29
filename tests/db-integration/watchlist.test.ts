@@ -14,6 +14,7 @@ const ALICE = 'user-alice'
 const BOB = 'user-bob'
 
 const INTERSTELLAR = { tmdbId: 157336, mediaType: 'movie' as const, title: 'Interstellar', posterPath: '/a.jpg' }
+const INCEPTION = { tmdbId: 27205, mediaType: 'movie' as const, title: 'Inception', posterPath: '/b.jpg' }
 const SEVERANCE = { tmdbId: 95396, mediaType: 'tv' as const, title: 'Severance', posterPath: null }
 
 beforeEach(async () => {
@@ -76,6 +77,17 @@ describe('isInWatchlist', () => {
     expect(await isInWatchlist(BOB, 157336, 'movie')).toBe(true)
     expect(await isInWatchlist(ALICE, 157336, 'movie')).toBe(false)
   })
+
+  it('answers per title, not per user', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    expect(await isInWatchlist(ALICE, 157336, 'movie')).toBe(true)
+    expect(await isInWatchlist(ALICE, 27205, 'movie')).toBe(false)
+  })
+
+  it('does not conflate media types sharing a TMDB id', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    expect(await isInWatchlist(ALICE, 157336, 'tv')).toBe(false)
+  })
 })
 
 describe('removeFromWatchlist', () => {
@@ -89,6 +101,22 @@ describe('removeFromWatchlist', () => {
     await addToWatchlist(BOB, INTERSTELLAR)
     await removeFromWatchlist(ALICE, 157336, 'movie')
     expect(await listForUser(BOB)).toHaveLength(1)
+  })
+
+  it('leaves the caller other titles alone', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    await addToWatchlist(ALICE, INCEPTION)
+    await removeFromWatchlist(ALICE, 157336, 'movie')
+    expect((await listForUser(ALICE)).map((row) => row.title)).toEqual(['Inception'])
+  })
+
+  it('does not conflate media types sharing a TMDB id', async () => {
+    await addToWatchlist(ALICE, INTERSTELLAR)
+    await addToWatchlist(ALICE, { ...INTERSTELLAR, mediaType: 'tv' })
+    await removeFromWatchlist(ALICE, 157336, 'movie')
+    const rows = await listForUser(ALICE)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]!.mediaType).toBe('tv')
   })
 
   it('is silent when there is nothing to remove', async () => {

@@ -9,7 +9,7 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:db": "TEST_DATABASE_URL=postgresql://postgres:devpass@localhost:5433/movies DATABASE_URL=postgresql://postgres:devpass@localhost:5433/movies DB_DRIVER=node-postgres vitest run --config vitest.db.config.ts",
+    "test:db": "DATABASE_URL=postgresql://postgres:devpass@localhost:5433/movies DB_DRIVER=node-postgres vitest run --config vitest.db.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
