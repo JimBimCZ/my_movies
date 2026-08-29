@@ -20,17 +20,27 @@ describe('genre page', () => {
     // Ten of the 27 merged genres exist on one side only; rendering an empty
     // row for the other side would be a heading over nothing.
     const code = page()
-    expect(code).toMatch(/genre\.movieId (!==|&&)/)
-    expect(code).toMatch(/genre\.tvId (!==|&&)/)
+    expect(code).toMatch(/genre\.movieId !== undefined/)
+    expect(code).toMatch(/genre\.tvId !== undefined/)
   })
 
   it('suspends each row separately so one slow list does not hold the other', () => {
     const code = page()
-    expect(code).toContain('<Suspense')
+    expect(code.match(/<Suspense/g)).toHaveLength(2)
     expect(code).toContain('RowSkeleton')
   })
 
   it('names the genre in the page metadata', () => {
     expect(page()).toContain('generateMetadata')
+  })
+})
+
+const loading = () => readFileSync('app/genre/[slug]/loading.tsx', 'utf8')
+
+describe('genre loading state', () => {
+  it('reserves a heading bar matching the real h1 and both rows', () => {
+    const code = loading()
+    expect(code).toContain('h-9')
+    expect(code.match(/<RowSkeleton/g)).toHaveLength(2)
   })
 })

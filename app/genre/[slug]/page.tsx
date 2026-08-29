@@ -7,6 +7,8 @@ import { toCardItem } from '@/lib/media'
 import { discoverByGenre, discoverTvByGenre } from '@/server/tmdb/endpoints/lists'
 import { findGenreBySlug } from '@/server/tmdb/endpoints/genres'
 
+const FIRST_ROW_PRIORITY_COUNT = 4
+
 export async function generateMetadata({
   params,
 }: PageProps<'/genre/[slug]'>): Promise<Metadata> {
@@ -19,12 +21,18 @@ export async function generateMetadata({
 
 async function MovieRow({ genreId }: { genreId: number }) {
   const items = await discoverByGenre(genreId)
-  return <Row title="Movies" items={items.map((item) => toCardItem(item))} priorityCount={4} />
+  return (
+    <Row
+      title="Movies"
+      items={items.map((item) => toCardItem(item))}
+      priorityCount={FIRST_ROW_PRIORITY_COUNT}
+    />
+  )
 }
 
-async function SeriesRow({ genreId }: { genreId: number }) {
+async function SeriesRow({ genreId, priorityCount }: { genreId: number; priorityCount: number }) {
   const items = await discoverTvByGenre(genreId)
-  return <Row title="Series" items={items.map((item) => toCardItem(item))} />
+  return <Row title="Series" items={items.map((item) => toCardItem(item))} priorityCount={priorityCount} />
 }
 
 export default async function GenrePage({ params }: PageProps<'/genre/[slug]'>) {
@@ -42,7 +50,10 @@ export default async function GenrePage({ params }: PageProps<'/genre/[slug]'>) 
       )}
       {genre.tvId !== undefined && (
         <Suspense fallback={<RowSkeleton title="Series" />}>
-          <SeriesRow genreId={genre.tvId} />
+          <SeriesRow
+            genreId={genre.tvId}
+            priorityCount={genre.movieId === undefined ? FIRST_ROW_PRIORITY_COUNT : 0}
+          />
         </Suspense>
       )}
     </main>
