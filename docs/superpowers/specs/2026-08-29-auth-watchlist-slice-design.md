@@ -1,7 +1,7 @@
 # Slice 2 — Auth.js sessions and the watchlist write path
 
 Date: 2026-08-29
-Status: approved, not yet implemented
+Status: implemented 2026-08-29
 
 ## Context
 
