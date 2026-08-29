@@ -1,10 +1,10 @@
+import { SearchInputSkeleton } from '@/components/search-input-skeleton'
+
 export default function Loading() {
   return (
     <main>
-      <div className="mx-auto mt-8 max-w-2xl px-6">
-        <div className="mb-2 h-5 w-40 animate-pulse rounded bg-white/5" />
-        <div className="h-[54px] w-full animate-pulse rounded-md border border-white/15 bg-white/5" />
-      </div>
+      <h1 className="mx-auto max-w-2xl px-6 pt-8 text-2xl font-bold tracking-tight">Search</h1>
+      <SearchInputSkeleton />
       <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 py-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
         {Array.from({ length: 12 }).map((_, index) => (
           <li key={index}>
