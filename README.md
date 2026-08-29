@@ -98,7 +98,7 @@ set -a; . ./.env.local; set +a   # compose reads TMDB_ACCESS_TOKEN from the envi
 docker compose up -d --build
 ```
 
-Compose fails fast when `TMDB_ACCESS_TOKEN` is unset rather than serving an empty catalogue that looks fine. That guard also blocks `ps`, `logs`, `stop` and `down`, so any placeholder unblocks teardown if you no longer have the value at hand: `TMDB_ACCESS_TOKEN=x docker compose down -v`.
+Compose fails fast when `TMDB_ACCESS_TOKEN` or any of the auth variables is unset rather than serving an empty catalogue that looks fine. That guard also blocks `ps`, `logs`, `stop` and `down`, so every guarded variable needs a placeholder to unblock teardown if you no longer have the values at hand: `TMDB_ACCESS_TOKEN=x AUTH_SECRET=x AUTH_GITHUB_ID=x AUTH_GITHUB_SECRET=x AUTH_GOOGLE_ID=x AUTH_GOOGLE_SECRET=x docker compose down -v`.
 
 ## Commands
 

@@ -23,8 +23,9 @@ services:
       # ${VAR:?err} fails fast instead of silently sending an empty token: without it,
       # `up` serves 200s with an empty catalogue — nothing looks broken. Export it first,
       # e.g. `set -a; . ./.env.local; set +a`. This also blocks ps/stop/down/logs (`logs`
-      # included — the command you'd reach for first); any placeholder unblocks teardown:
-      # `TMDB_ACCESS_TOKEN=x docker compose down -v`.
+      # included — the command you'd reach for first); every guarded variable needs a
+      # placeholder to unblock teardown: `TMDB_ACCESS_TOKEN=x AUTH_SECRET=x AUTH_GITHUB_ID=x
+      # AUTH_GITHUB_SECRET=x AUTH_GOOGLE_ID=x AUTH_GOOGLE_SECRET=x docker compose down -v`.
       TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:?set TMDB_ACCESS_TOKEN before running compose, e.g. set -a; . ./.env.local; set +a}
       AUTH_URL: http://localhost:3000
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET before running compose, e.g. set -a; . ./.env.local; set +a}
