@@ -139,7 +139,9 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full conventions.
 pnpm test
 ```
 
-No test makes a network call — the TMDB response types are derived from real payloads captured into `tests/fixtures/tmdb/`. To re-capture them (needs `jq` and a working token):
+`pnpm test` is hermetic and makes no network or database calls. `pnpm test:db` runs the watchlist repository against the compose Postgres — start it first with `docker compose up -d db`.
+
+No test in `pnpm test` makes a network call — the TMDB response types are derived from real payloads captured into `tests/fixtures/tmdb/`. To re-capture them (needs `jq` and a working token):
 
 ```bash
 ./scripts/capture-tmdb-fixtures.sh

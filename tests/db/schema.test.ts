@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { getTableColumns } from 'drizzle-orm'
 import { getTableConfig } from 'drizzle-orm/pg-core'
 import { accounts, sessions, users, watchlistItems } from '@/server/db/schema'
 
@@ -37,5 +38,33 @@ describe('auth tables', () => {
     const email = config.columns.find((c) => c.name === 'email')
     const named = config.uniqueConstraints.some((c) => c.columns.some((col) => col.name === 'email'))
     expect(email?.isUnique === true || named).toBe(true)
+  })
+
+  // The adapter addresses these tables by TypeScript property name, and Drizzle's insert
+  // builder reads value[propertyName]: a drifted property yields undefined and writes NULL
+  // or DEFAULT without erroring, so only a real sign-in would reveal it. The SQL column
+  // names above cannot catch that; these can.
+  it('exposes the property names the Auth.js adapter writes by', () => {
+    expect(Object.keys(getTableColumns(users))).toEqual([
+      'id',
+      'name',
+      'email',
+      'emailVerified',
+      'image',
+    ])
+    expect(Object.keys(getTableColumns(accounts))).toEqual([
+      'userId',
+      'type',
+      'provider',
+      'providerAccountId',
+      'refresh_token',
+      'access_token',
+      'expires_at',
+      'token_type',
+      'scope',
+      'id_token',
+      'session_state',
+    ])
+    expect(Object.keys(getTableColumns(sessions))).toEqual(['sessionToken', 'userId', 'expires'])
   })
 })
