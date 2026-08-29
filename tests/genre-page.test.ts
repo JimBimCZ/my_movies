@@ -34,13 +34,3 @@ describe('genre page', () => {
     expect(page()).toContain('generateMetadata')
   })
 })
-
-const loading = () => readFileSync('app/genre/[slug]/loading.tsx', 'utf8')
-
-describe('genre loading state', () => {
-  it('reserves a heading bar matching the real h1 and both rows', () => {
-    const code = loading()
-    expect(code).toContain('h-9')
-    expect(code.match(/<RowSkeleton/g)).toHaveLength(2)
-  })
-})

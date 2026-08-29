@@ -3,9 +3,10 @@ import { GenresMenu } from '@/components/genres-menu'
 import { signOutAction } from '@/server/auth/actions'
 import { auth } from '@/server/auth/config'
 import { getMergedGenres } from '@/server/tmdb/endpoints/genres'
+import type { MergedGenre } from '@/lib/genres'
 
 export async function SiteHeader() {
-  const [session, genres] = await Promise.all([auth(), getMergedGenres()])
+  const [session, genres] = await Promise.all([auth(), getMergedGenres().catch(() => [] as MergedGenre[])])
 
   return (
     <header className="sticky top-0 z-20 bg-gradient-to-b from-black/90 via-black/60 to-transparent px-6 pb-8 pt-4">
@@ -19,7 +20,7 @@ export async function SiteHeader() {
         >
           Search
         </Link>
-        <GenresMenu genres={genres} />
+        {genres.length > 0 ? <GenresMenu genres={genres} /> : null}
         {session ? (
           <Link
             href="/watchlist"

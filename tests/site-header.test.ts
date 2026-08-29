@@ -43,4 +43,8 @@ describe('site header', () => {
     expect(code).toMatch(/await\b[^\n]*\bgetMergedGenres\(\)/)
     expect(code).toMatch(/<GenresMenu genres=\{genres\} \/>/)
   })
+
+  it('guards the genre fetch so a TMDB outage does not take down every route', () => {
+    expect(header()).toMatch(/getMergedGenres\(\)\.catch\(/)
+  })
 })
