@@ -55,7 +55,7 @@ export function GenresMenu({ genres }: { genres: MergedGenre[] }) {
       <div
         id={panelId}
         hidden={!open}
-        className="absolute left-0 top-full z-30 max-h-[70vh] w-[min(90vw,34rem)] overflow-y-auto rounded-md border border-white/10 bg-[var(--background)] p-4 shadow-2xl"
+        className="fixed inset-x-3 top-[4.75rem] z-30 max-h-[70vh] w-auto overflow-y-auto rounded-md border border-white/10 bg-[var(--background)] p-4 shadow-2xl sm:absolute sm:inset-x-auto sm:left-0 sm:top-full sm:w-[min(90vw,34rem)]"
       >
         <ul className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
           {genres.map((genre) => (

@@ -9,8 +9,8 @@ export async function SiteHeader() {
   const [session, genres] = await Promise.all([auth(), getMergedGenres().catch(() => [] as MergedGenre[])])
 
   return (
-    <header className="sticky top-0 z-20 bg-gradient-to-b from-black/90 via-black/60 to-transparent px-6 pb-8 pt-4">
-      <nav className="mx-auto flex max-w-7xl items-center gap-6">
+    <header className="pointer-events-none sticky top-0 z-20 bg-gradient-to-b from-black/90 via-black/60 to-transparent px-6 pb-8 pt-4">
+      <nav className="pointer-events-auto mx-auto flex max-w-7xl items-center gap-6">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           My Movies
         </Link>
