@@ -85,6 +85,55 @@ describe('list endpoints', () => {
     expect(shows[0]!.media_type).toBe('tv')
   })
 
+  it('getUpcoming asks for a release window that starts today', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-30T00:00:00Z'))
+    const fetchMock = respondWith(fixture('upcoming'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { getUpcoming } = await import('@/server/tmdb/endpoints/lists')
+
+    await getUpcoming()
+
+    const [url, init] = fetchMock.mock.calls[0]!
+    const params = new URL(url).searchParams
+    expect(url).toContain('/discover/movie')
+    expect(params.get('primary_release_date.gte')).toBe('2026-08-30')
+    expect(params.get('primary_release_date.lte')).toBe('2027-08-30')
+    expect(params.get('sort_by')).toBe('popularity.desc')
+    expect(init.next.tags).toContain(tags.list('upcoming'))
+    expect(init.next.revalidate).toBe(REVALIDATE.list)
+    vi.useRealTimers()
+  })
+
+  it('getUpcoming moves its window as the clock advances', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2027-01-15T00:00:00Z'))
+    const fetchMock = respondWith(fixture('upcoming'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { getUpcoming } = await import('@/server/tmdb/endpoints/lists')
+
+    await getUpcoming()
+
+    const params = new URL(fetchMock.mock.calls[0]![0]).searchParams
+    expect(params.get('primary_release_date.gte')).toBe('2027-01-15')
+    expect(params.get('primary_release_date.lte')).toBe('2028-01-15')
+    vi.useRealTimers()
+  })
+
+  it('getUpcoming tags results as movies', async () => {
+    const fetchMock = respondWith(fixture('upcoming'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { getUpcoming } = await import('@/server/tmdb/endpoints/lists')
+
+    const results = await getUpcoming()
+
+    expect(results.length).toBeGreaterThan(0)
+    for (const item of results) {
+      expect(item.media_type).toBe('movie')
+    }
+    expect(results[0]).toHaveProperty('title')
+  })
+
   it('getMovieGenres unwraps the genres envelope', async () => {
     const fetchMock = respondWith(fixture('genres-movie'))
     vi.stubGlobal('fetch', fetchMock)

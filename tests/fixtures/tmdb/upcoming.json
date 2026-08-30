@@ -1,0 +1,418 @@
+{
+    "page": 1,
+    "results": [
+        {
+            "adult": false,
+            "backdrop_path": "/s4v0UX1anfXm0UvloLsTTJ4v222.jpg",
+            "genre_ids": [
+                878,
+                28,
+                12
+            ],
+            "id": 1003596,
+            "title": "Avengers: Doomsday",
+            "original_language": "en",
+            "original_title": "Avengers: Doomsday",
+            "overview": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
+            "popularity": 59.6355,
+            "poster_path": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
+            "release_date": "2026-12-16",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/g4wdPZlhVioK69H8Q0o9Id5QhNs.jpg",
+            "genre_ids": [
+                53
+            ],
+            "id": 1101412,
+            "title": "Fall 2: Deadpoint",
+            "original_language": "en",
+            "original_title": "Fall 2: Deadpoint",
+            "overview": "On a perilous climb across Thailand's Mount Kwan, two climbers become trapped thousands of feet above the ground, where vertigo-inducing heights, sheer exposure, and impossible odds turn every moment into a fight for survival.",
+            "popularity": 29.5018,
+            "poster_path": "/p73G56bJGPa5y52cyqWscHR6NnN.jpg",
+            "release_date": "2026-09-01",
+            "softcore": false,
+            "video": false,
+            "vote_average": 4.5,
+            "vote_count": 4
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/p1Xk8xNHHP1HJx2yGZuREp8Etab.jpg",
+            "genre_ids": [
+                10749,
+                35
+            ],
+            "id": 1032863,
+            "title": "The Love Hypothesis",
+            "original_language": "en",
+            "original_title": "The Love Hypothesis",
+            "overview": "Olive Smith, a biology PhD candidate, and Dr. Adam Carlsen, a hotshot professor and well-known tyrant, enter into a fake relationship, seeing each of their carefully calculated theories on love get thrown into chaos.",
+            "popularity": 45.3047,
+            "poster_path": "/zUaTMxLOuW4wdaFYhRVJbO6W8Sy.jpg",
+            "release_date": "2026-09-23",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/kPbyLj2OyjojqvR1jfK1VvXzabg.jpg",
+            "genre_ids": [
+                18
+            ],
+            "id": 1483525,
+            "title": "Possible Love",
+            "original_language": "ko",
+            "original_title": "\uac00\ub2a5\ud55c \uc0ac\ub791",
+            "overview": "A laid-off worker and his wife cross paths with a documentary filmmaker and her spouse and confront their hidden desires.",
+            "popularity": 21.0925,
+            "poster_path": "/dLz9yHeLw4x4sD0WTSNi7HuK2ke.jpg",
+            "release_date": "2026-09-23",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/mRM28tIIm8y0gKy9GKYGwotxuPM.jpg",
+            "genre_ids": [
+                27,
+                878
+            ],
+            "id": 1423191,
+            "title": "Resident Evil",
+            "original_language": "en",
+            "original_title": "Resident Evil",
+            "overview": "Bryan, a medical courier, unwittingly finds himself fighting for survival as one fateful, horrifying night collapses around him in chaos.",
+            "popularity": 16.7182,
+            "poster_path": "/guq5cJ43v0qcMtLqrYHe5P9fgFM.jpg",
+            "release_date": "2026-09-16",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/bicMU6xVD5deVyKP2azpyx7xkmH.jpg",
+            "genre_ids": [
+                12,
+                53
+            ],
+            "id": 1263337,
+            "title": "Heart of the Beast",
+            "original_language": "en",
+            "original_title": "Heart of the Beast",
+            "overview": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
+            "popularity": 15.476,
+            "poster_path": "/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
+            "release_date": "2026-09-19",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/Ao7Q6CMDiVheAqVyKV8vUI8yata.jpg",
+            "genre_ids": [
+                10749,
+                14,
+                35
+            ],
+            "id": 1302904,
+            "title": "Practical Magic 2",
+            "original_language": "en",
+            "original_title": "Practical Magic 2",
+            "overview": "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all.",
+            "popularity": 15.2719,
+            "poster_path": "/7jCV8dkRFK3DGJ4dTqlvrMTFPwZ.jpg",
+            "release_date": "2026-09-09",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/obsM8IyBz3jn8hbru8V5btBRSBk.jpg",
+            "genre_ids": [
+                12,
+                16,
+                35,
+                10751,
+                14
+            ],
+            "id": 1465063,
+            "title": "Forgotten Island",
+            "original_language": "en",
+            "original_title": "Forgotten Island",
+            "overview": "While celebrating their last night together, high school graduates and best friends Jo and Raissa stumble upon a mysterious portal that transports them to the fantastical island of Nakali. When they discover that the memories of their entire friendship are the price for returning home, Jo and Raissa will race to find a way to leave the island before they forget each other forever.",
+            "popularity": 13.981,
+            "poster_path": "/kW1fH2jZZM5tVHwNaDdUOUXJvWU.jpg",
+            "release_date": "2026-09-16",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/i5E9H7Ik0u61ylDDTbmUpTL3Yw.jpg",
+            "genre_ids": [
+                878,
+                12
+            ],
+            "id": 1170608,
+            "title": "Dune: Part Three",
+            "original_language": "en",
+            "original_title": "Dune: Part Three",
+            "overview": "Emperor Paul Atreides faces the fallout from his ascent to power as political plots and a galaxy-wide holy war endanger the future only he can see.",
+            "popularity": 13.8515,
+            "poster_path": "/d43fvHQsIMa4kpyhKXw0haEJIvI.jpg",
+            "release_date": "2026-12-15",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/1ewgN7tG15VPpYbW0CE3UCXabVD.jpg",
+            "genre_ids": [
+                10749,
+                18,
+                53
+            ],
+            "id": 1440098,
+            "title": "Drawn Together",
+            "original_language": "es",
+            "original_title": "Enfrentados: Marfil",
+            "overview": "Marfil Cort\u00e9s, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
+            "popularity": 13.227,
+            "poster_path": "/7HH4BtNwt7WYaBN5pwCv0cCww4z.jpg",
+            "release_date": "2026-09-09",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/8XPPKEgO7sJs0rP53h3kUPT1tTW.jpg",
+            "genre_ids": [
+                27,
+                18
+            ],
+            "id": 718833,
+            "title": "Bokshi",
+            "original_language": "hi",
+            "original_title": "Bokshi",
+            "overview": "Anahita, traumatised by the brutal disappearance of her mother, finds comfort in Shalini, her history teacher. On an unconventional school excursion to a mysterious prehistoric site, she confronts her terrifying destiny.",
+            "popularity": 12.4729,
+            "poster_path": "/iHYu4aCDIjnt6aa5WmKZvmDPJvh.jpg",
+            "release_date": "2026-10-09",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/2c9zNZJL0ZdagD6JbmU3hH4hovs.jpg",
+            "genre_ids": [
+                28,
+                35,
+                53
+            ],
+            "id": 1377237,
+            "title": "Runner",
+            "original_language": "en",
+            "original_title": "Runner",
+            "overview": "A former soldier is thrown into a brutal race against time when a critical medical delivery makes him and his unlikely partner the targets of a ruthless cartel. As the mission spirals into a deadly manhunt, every detour, delay, and bullet pushes them closer to failure. With betrayal closing in from every side, they must survive the chase and deliver their cargo to save the life of a little girl.",
+            "popularity": 12.6518,
+            "poster_path": "/yBKMAIj7clP42UkFejhGDBBoTpb.jpg",
+            "release_date": "2026-09-10",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/lsFLh0tcvafTom7lADYg4EGtDlY.jpg",
+            "genre_ids": [
+                16,
+                28,
+                12
+            ],
+            "id": 1599189,
+            "title": "\u5251\u6765\u9662\u7ebf\u5267\u573a\u7248 \u5341\u4e09\u4e4b\u4e89",
+            "original_language": "zh",
+            "original_title": "\u5251\u6765\u9662\u7ebf\u5267\u573a\u7248 \u5341\u4e09\u4e4b\u4e89",
+            "overview": "",
+            "popularity": 9.7318,
+            "poster_path": "/95OnjUQ1mlu7JHvIMcjYL6ah9Ah.jpg",
+            "release_date": "2026-12-01",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/pJfMliqzzVzTU634zpYDMfYNX6c.jpg",
+            "genre_ids": [
+                12,
+                16,
+                35,
+                10751
+            ],
+            "id": 1384758,
+            "title": "Ice Age: Boiling Point",
+            "original_language": "en",
+            "original_title": "Ice Age: Boiling Point",
+            "overview": "A dinosaur-and-lava-filled madcap adventure takes Manny, Sid, Diego, Ellie, Buck, acorn-obsessed Scrat \u2013 this time joined by Baby Scrat and the enormous Jurassic Scrat \u2013 and the rest of the herd to visit never before-seen corners of the treacherous Lost World.",
+            "popularity": 10.7027,
+            "poster_path": "/mPhAreyZLLcZ9pl4KRyEaqSu1Zv.jpg",
+            "release_date": "2027-02-03",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/8bEKkBsj0Xhpct20LFHXhKYO0Jb.jpg",
+            "genre_ids": [
+                27,
+                53,
+                28
+            ],
+            "id": 1556321,
+            "title": "Death Whisperer: Saming the Werebeast",
+            "original_language": "th",
+            "original_title": "\u0e18\u0e35\u0e48\u0e2b\u0e22\u0e14: \u0e2a\u0e21\u0e34\u0e07\u0e40\u0e02\u0e32\u0e02\u0e27\u0e32\u0e07",
+            "overview": "Set in 1968 in Kanchanaburi, Thailand, the story follows Yak, a soldier from the Black Tiger Division, sent on an urgent mission into the forest of Khao Khwang to find Thap, a missing military intelligence officer.",
+            "popularity": 10.7047,
+            "poster_path": "/tOhbvoTC10Nf9WTBI1EIwaXz9Et.jpg",
+            "release_date": "2026-09-30",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/AsVFiOj8p0KERLZRRz58mZv4zsq.jpg",
+            "genre_ids": [
+                35,
+                28,
+                10751,
+                878
+            ],
+            "id": 1401586,
+            "title": "Sonic the Hedgehog 4",
+            "original_language": "en",
+            "original_title": "Sonic the Hedgehog 4",
+            "overview": "Sonic the Hedgehog, joined by a new hero named Amy, faces a new technological nemesis known as Metal Sonic.",
+            "popularity": 9.5693,
+            "poster_path": "/t8uoHBODkFlSQJRL6qc4IclUBlH.jpg",
+            "release_date": "2027-03-11",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/b7t3r39Oll5qPxBKzLZ8eHMBD7l.jpg",
+            "genre_ids": [
+                35
+            ],
+            "id": 1248832,
+            "title": "Digger",
+            "original_language": "en",
+            "original_title": "Digger",
+            "overview": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything.",
+            "popularity": 10.0502,
+            "poster_path": "/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
+            "release_date": "2026-09-30",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/aqFZcr2dxSZ2UwWSo1WC6C0rwDf.jpg",
+            "genre_ids": [
+                878,
+                28,
+                12
+            ],
+            "id": 1300968,
+            "title": "The Hunger Games: Sunrise on the Reaping",
+            "original_language": "en",
+            "original_title": "The Hunger Games: Sunrise on the Reaping",
+            "overview": "Return to the world of Panem 24 years before the events of The Hunger Games, starting on the morning of the reaping of the 50th Hunger Games, also known as the Second Quarter Quell.",
+            "popularity": 9.4001,
+            "poster_path": "/ffJaYMtB6v1TrvkyhCOqwqCKm0o.jpg",
+            "release_date": "2026-11-18",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/ycqTwRV7jUxjMospXxKTVS74nft.jpg",
+            "genre_ids": [
+                18,
+                53
+            ],
+            "id": 1281331,
+            "title": "The Social Reckoning",
+            "original_language": "en",
+            "original_title": "The Social Reckoning",
+            "overview": "Frances Haugen, a young Facebook engineer, enlists the help of Jeff Horwitz, a Wall Street Journal reporter, to go on a dangerous journey that ends up blowing the whistle on the social network's most guarded secrets.",
+            "popularity": 8.61,
+            "poster_path": "/qZr5bxGXE1t2A9pNSikb9fQKzov.jpg",
+            "release_date": "2026-10-07",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/ggqvhSdAASrseKuMlzk51sbvbE8.jpg",
+            "genre_ids": [
+                28,
+                53
+            ],
+            "id": 1562642,
+            "title": "Ghost Soldier",
+            "original_language": "en",
+            "original_title": "Ghost Soldier",
+            "overview": "Reclusive government asset Henry Fitzgerald is living off the grid in Wyoming, designing new systems for a weapons research agency. When a multi trillion dollar investment management firm begins employing corrupt police and foreign mercenaries to force farmers off their ranches, the Green Beret veteran decides to employ his weapon prototypes to assist his neighbors.",
+            "popularity": 8.908,
+            "poster_path": "/h3N9bQbuDtswq6nNtREpyhUYyv9.jpg",
+            "release_date": "2026-11-04",
+            "softcore": false,
+            "video": false,
+            "vote_average": 0.0,
+            "vote_count": 0
+        }
+    ],
+    "total_pages": 172,
+    "total_results": 3433
+}
