@@ -14,6 +14,12 @@ describe('isKnownTag', () => {
     expect(isKnownTag(tags.list('top-rated'))).toBe(true)
     expect(isKnownTag(tags.list('airing-today'))).toBe(true)
     expect(isKnownTag(tags.list('genre-28'))).toBe(true)
+    expect(isKnownTag(tags.list('upcoming'))).toBe(true)
+  })
+
+  it('rejects a name that merely starts with upcoming', () => {
+    expect(isKnownTag('tmdb:list:upcoming-x')).toBe(false)
+    expect(isKnownTag('tmdb:list:upcomin')).toBe(false)
   })
 
   it('accepts detail tags for both media types', () => {

@@ -13,6 +13,7 @@ type ListName =
   | 'now-playing'
   | 'top-rated'
   | 'airing-today'
+  | 'upcoming'
   | `genre-${number}`
   | `tv-genre-${number}`
 
@@ -31,7 +32,7 @@ const FIXED_TAGS: ReadonlySet<string> = new Set([
   tags.trending,
   tags.search,
 ])
-const LIST_TAG = /^tmdb:list:(?:now-playing|top-rated|airing-today|genre-\d+|tv-genre-\d+)$/
+const LIST_TAG = /^tmdb:list:(?:now-playing|top-rated|airing-today|upcoming|genre-\d+|tv-genre-\d+)$/
 const DETAIL_TAG = /^tmdb:title:(?:movie|tv):\d+$/
 
 // Mirrors the builders above, and must keep mirroring them. Revalidation is reachable over

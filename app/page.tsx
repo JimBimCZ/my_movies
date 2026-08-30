@@ -12,6 +12,7 @@ import {
   getNowPlaying,
   getTopRated,
   getTrending,
+  getUpcoming,
 } from '@/server/tmdb/endpoints/lists'
 
 const FIRST_ROW_PRIORITY_COUNT = 4
@@ -33,6 +34,11 @@ async function TrendingRow() {
 async function NowPlayingRow() {
   const items = await getNowPlaying()
   return <Row title="Now playing" items={items.map((item) => toCardItem(item))} />
+}
+
+async function UpcomingRow() {
+  const items = await getUpcoming()
+  return <Row title="Upcoming" items={items.map((item) => toCardItem(item))} />
 }
 
 async function TopRatedRow() {
@@ -86,6 +92,9 @@ export default async function HomePage() {
       </Suspense>
       <Suspense fallback={<RowSkeleton title="Now playing" />}>
         <NowPlayingRow />
+      </Suspense>
+      <Suspense fallback={<RowSkeleton title="Upcoming" />}>
+        <UpcomingRow />
       </Suspense>
       <Suspense fallback={<RowSkeleton title="Top rated" />}>
         <TopRatedRow />
