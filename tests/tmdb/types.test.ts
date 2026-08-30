@@ -3,12 +3,14 @@ import { readFileSync } from 'node:fs'
 import type {
   Genre,
   MovieDetail,
+  MovieDetailFull,
   MovieListItem,
   PagedResponse,
   SearchResultItem,
   TmdbConfiguration,
   TrendingItem,
   TvDetail,
+  TvDetailFull,
   TvListItem,
 } from '@/server/tmdb/types'
 
@@ -67,6 +69,7 @@ const MOVIE_DETAIL_KEYS = declaredKeys<MovieDetail>({
   overview: true,
   popularity: true,
   poster_path: true,
+  production_companies: true,
   release_date: true,
   runtime: true,
   softcore: true,
@@ -81,6 +84,7 @@ const MOVIE_DETAIL_KEYS = declaredKeys<MovieDetail>({
 const TV_DETAIL_KEYS = declaredKeys<TvDetail>({
   adult: true,
   backdrop_path: true,
+  created_by: true,
   episode_run_time: true,
   first_air_date: true,
   genres: true,
@@ -90,6 +94,7 @@ const TV_DETAIL_KEYS = declaredKeys<TvDetail>({
   languages: true,
   last_air_date: true,
   name: true,
+  networks: true,
   number_of_episodes: true,
   number_of_seasons: true,
   origin_country: true,
@@ -251,6 +256,46 @@ describe('captured TMDB payloads', () => {
     const tv = load('tv-detail')
     for (const key of TV_DETAIL_KEYS) {
       expect(tv, `tv-detail.${key}`).toHaveProperty(key)
+    }
+  })
+
+  it('appended credits carry a cast ordered from the top billing', () => {
+    const detail = load('movie-detail') as MovieDetailFull
+    expect(detail.credits.cast[0]!.order).toBe(0)
+    expect(typeof detail.credits.cast[0]!.character).toBe('string')
+    expect(isStringOrNull(detail.credits.cast[0]!.profile_path)).toBe(true)
+    expect(detail.credits.crew.some((member) => member.job === 'Director')).toBe(true)
+  })
+
+  it('cast_id is a movie-credits field: tv cast entries omit it entirely', () => {
+    // Not null — the key is absent. CastMember is shared by both media types, so it
+    // has to be optional or every tv cast entry is a lie about its own shape.
+    const movie = load('movie-detail') as MovieDetailFull
+    const tv = load('tv-detail') as TvDetailFull
+    expect(movie.credits.cast.every((member) => 'cast_id' in member)).toBe(true)
+    expect(tv.credits.cast.some((member) => 'cast_id' in member)).toBe(false)
+  })
+
+  it('tv credits name no Director; the creator lives on created_by', () => {
+    const detail = load('tv-detail') as TvDetailFull
+    expect(detail.credits.crew.some((member) => member.job === 'Director')).toBe(false)
+    expect(detail.created_by.length).toBeGreaterThan(0)
+    expect(typeof detail.created_by[0]!.name).toBe('string')
+  })
+
+  it('a real tv payload can carry no videos and no episode runtime at all', () => {
+    const detail = load('tv-detail') as TvDetailFull
+    expect(detail.videos.results).toEqual([])
+    expect(detail.episode_run_time).toEqual([])
+  })
+
+  it('appended images expose voted backdrops', () => {
+    const detail = load('movie-detail') as MovieDetailFull
+    expect(detail.images.backdrops.length).toBeGreaterThan(0)
+    for (const asset of detail.images.backdrops) {
+      expect(typeof asset.file_path).toBe('string')
+      expect(typeof asset.vote_average).toBe('number')
+      expect(typeof asset.vote_count).toBe('number')
     }
   })
 

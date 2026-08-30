@@ -120,6 +120,35 @@ describe('list endpoints', () => {
 
     expect(results[0]!.media_type).toBe('movie')
   })
+
+  it('getTvGenres reads the tv list and shares the genres tag', async () => {
+    const fetchMock = respondWith(fixture('genres-tv'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { getTvGenres } = await import('@/server/tmdb/endpoints/lists')
+
+    const genres = await getTvGenres()
+
+    const [url, init] = fetchMock.mock.calls[0]!
+    expect(url).toContain('/genre/tv/list')
+    expect(init.next.tags).toContain(tags.genres)
+    expect(init.next.revalidate).toBe(REVALIDATE.genres)
+    expect(genres.some((genre) => genre.name === 'Action & Adventure')).toBe(true)
+  })
+
+  it('discoverTvByGenre filters on the tv genre and tags its own list', async () => {
+    const fetchMock = respondWith(fixture('discover-tv'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { discoverTvByGenre } = await import('@/server/tmdb/endpoints/lists')
+
+    const results = await discoverTvByGenre(10765)
+
+    const [url, init] = fetchMock.mock.calls[0]!
+    expect(url).toContain('/discover/tv')
+    expect(url).toContain('with_genres=10765')
+    expect(init.next.tags).toContain(tags.list('tv-genre-10765'))
+    expect(results[0]!.media_type).toBe('tv')
+    expect(results[0]).toHaveProperty('name')
+  })
 })
 
 describe('title endpoints', () => {
@@ -129,7 +158,7 @@ describe('title endpoints', () => {
   })
   afterEach(() => vi.unstubAllGlobals())
 
-  it('getTitleDetail routes movie to the movie endpoint with a per-title tag', async () => {
+  it('getTitleDetail appends credits, videos and images to the movie request', async () => {
     const fetchMock = respondWith(fixture('movie-detail'))
     vi.stubGlobal('fetch', fetchMock)
     const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
@@ -138,13 +167,17 @@ describe('title endpoints', () => {
 
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toContain('/movie/27205')
+    expect(url).toContain('append_to_response=credits%2Cvideos%2Cimages')
+    expect(url).toContain('include_image_language=en%2Cnull')
     expect(init.next.tags).toContain('tmdb:title:movie:27205')
     expect(init.next.revalidate).toBe(REVALIDATE.detail)
     expect(detail.media_type).toBe('movie')
-    expect(detail).toEqual({ ...fixture('movie-detail'), media_type: 'movie' })
+    expect(detail.credits.cast.length).toBeGreaterThan(0)
+    expect(detail.images.backdrops.length).toBeGreaterThan(0)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('getTitleDetail routes tv to the tv endpoint', async () => {
+  it('getTitleDetail makes the same single appended request for tv', async () => {
     const fetchMock = respondWith(fixture('tv-detail'))
     vi.stubGlobal('fetch', fetchMock)
     const { getTitleDetail } = await import('@/server/tmdb/endpoints/titles')
@@ -153,8 +186,10 @@ describe('title endpoints', () => {
 
     const [url] = fetchMock.mock.calls[0]!
     expect(url).toContain('/tv/1396')
+    expect(url).toContain('append_to_response=credits%2Cvideos%2Cimages')
     expect(detail.media_type).toBe('tv')
     expect(detail).toEqual({ ...fixture('tv-detail'), media_type: 'tv' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -187,5 +222,53 @@ describe('search', () => {
 
     expect(await searchMulti('   ')).toEqual([])
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('merged genres', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    process.env.TMDB_ACCESS_TOKEN = 'test-token'
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  const respondPerUrl = () =>
+    vi.fn().mockImplementation((url: string) => {
+      const body = url.includes('/genre/tv/list') ? fixture('genres-tv') : fixture('genres-movie')
+      return Promise.resolve(
+        new Response(JSON.stringify(body), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+    })
+
+  it('reads both lists and returns their union', async () => {
+    vi.stubGlobal('fetch', respondPerUrl())
+    const { getMergedGenres } = await import('@/server/tmdb/endpoints/genres')
+
+    const merged = await getMergedGenres()
+
+    expect(merged).toHaveLength(27)
+    expect(merged.find((genre) => genre.slug === 'drama')).toEqual({
+      slug: 'drama',
+      name: 'Drama',
+      movieId: 18,
+      tvId: 18,
+    })
+  })
+
+  it('finds a genre by slug', async () => {
+    vi.stubGlobal('fetch', respondPerUrl())
+    const { findGenreBySlug } = await import('@/server/tmdb/endpoints/genres')
+
+    expect((await findGenreBySlug('sci-fi-and-fantasy'))?.tvId).toBe(10765)
+  })
+
+  it('returns null for a slug TMDB does not have', async () => {
+    vi.stubGlobal('fetch', respondPerUrl())
+    const { findGenreBySlug } = await import('@/server/tmdb/endpoints/genres')
+
+    expect(await findGenreBySlug('not-a-genre')).toBeNull()
   })
 })

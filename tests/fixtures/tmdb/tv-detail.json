@@ -65,7 +65,7 @@
   "original_language": "en",
   "original_name": "Breaking Bad",
   "overview": "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family's financial future at any cost as he enters the dangerous world of drugs and crime.",
-  "popularity": 129.3544,
+  "popularity": 165.1607,
   "poster_path": "/anFx9aTOOYqgS3v7x3R84Kz67ly.jpg",
   "production_companies": [
     {
@@ -139,7 +139,7 @@
       "episode_count": 13,
       "id": 3576,
       "name": "Season 4",
-      "overview": "Walt and Jesse must cope with the fallout of their previous actions, both personally and professionally. Tension mounts as Walt faces a true standoff with his employer, Gus, with neither side willing or able to back down. Walt must also adjust to a new relationship with Skyler, whom while still reconciling her relationship with Walt, is committed to properly laundering Walt’s money and ensuring her sister Marie and an ailing Hank are financially stable.",
+      "overview": "Walt and Jesse must cope with the fallout of their previous actions, both personally and professionally. Tension mounts as Walt faces a true standoff with his employer, Gus, with neither side willing or able to back down. Walt must also adjust to a new relationship with Skyler, whom while still reconciling her relationship with Walt, is committed to properly laundering Walt\u2019s money and ensuring her sister Marie and an ailing Hank are financially stable.",
       "poster_path": "/5ewrnKp4TboU4hTLT5cWO350mHj.jpg",
       "season_number": 4,
       "vote_average": 8.6
@@ -149,7 +149,7 @@
       "episode_count": 16,
       "id": 3578,
       "name": "Season 5",
-      "overview": "Walt is faced with the prospect of moving on in a world without his enemy. As the pressure of a criminal life starts to build, Skyler struggles to keep Walt’s terrible secrets. Facing resistance from sometime adversary and former Fring lieutenant Mike, Walt tries to keep his world from falling apart even as his DEA Agent brother in law, Hank, finds numerous leads that could blaze a path straight to Walt. ",
+      "overview": "Walt is faced with the prospect of moving on in a world without his enemy. As the pressure of a criminal life starts to build, Skyler struggles to keep Walt\u2019s terrible secrets. Facing resistance from sometime adversary and former Fring lieutenant Mike, Walt tries to keep his world from falling apart even as his DEA Agent brother in law, Hank, finds numerous leads that could blaze a path straight to Walt.\u00a0",
       "poster_path": "/r3z70vunihrAkjILQKWHX0G2xzO.jpg",
       "season_number": 5,
       "vote_average": 8.9
@@ -170,12 +170,404 @@
     {
       "english_name": "Spanish",
       "iso_639_1": "es",
-      "name": "Español"
+      "name": "Espa\u00f1ol"
     }
   ],
   "status": "Ended",
   "tagline": "Change the equation.",
   "type": "Scripted",
-  "vote_average": 8.9,
-  "vote_count": 18481
+  "vote_average": 8.949,
+  "vote_count": 18488,
+  "credits": {
+    "cast": [
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 17419,
+        "known_for_department": "Acting",
+        "name": "Bryan Cranston",
+        "original_name": "Bryan Cranston",
+        "popularity": 5.4681,
+        "profile_path": "/npIIZJGSrcJIJ6yHdmbqO6Jzo5I.jpg",
+        "character": "Walter White",
+        "credit_id": "52542282760ee313280017f9",
+        "order": 0
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 84497,
+        "known_for_department": "Acting",
+        "name": "Aaron Paul",
+        "original_name": "Aaron Paul",
+        "popularity": 3.7009,
+        "profile_path": "/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg",
+        "character": "Jesse Pinkman",
+        "credit_id": "52542282760ee31328001845",
+        "order": 1
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 134531,
+        "known_for_department": "Acting",
+        "name": "Anna Gunn",
+        "original_name": "Anna Gunn",
+        "popularity": 3.1668,
+        "profile_path": "/adppyeu1a4REN3khtgmXusrapFi.jpg",
+        "character": "Skyler White",
+        "credit_id": "52542282760ee3132800181b",
+        "order": 2
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 209674,
+        "known_for_department": "Acting",
+        "name": "RJ Mitte",
+        "original_name": "RJ Mitte",
+        "popularity": 2.0866,
+        "profile_path": "/sNPA92ZrssYhlaB1UA2pWcLD9db.jpg",
+        "character": "Walter White Jr.",
+        "credit_id": "52542284760ee313280018a9",
+        "order": 3
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 14329,
+        "known_for_department": "Acting",
+        "name": "Dean Norris",
+        "original_name": "Dean Norris",
+        "popularity": 3.8246,
+        "profile_path": "/mKRrEbsxAX3ro700HsViFArRM7l.jpg",
+        "character": "Hank Schrader",
+        "credit_id": "52542283760ee3132800187b",
+        "order": 4
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 1217934,
+        "known_for_department": "Acting",
+        "name": "Betsy Brandt",
+        "original_name": "Betsy Brandt",
+        "popularity": 4.5372,
+        "profile_path": "/xAnuzyjdMbQq9L1c4JNwXL52Wm4.jpg",
+        "character": "Marie Schrader",
+        "credit_id": "52542283760ee31328001891",
+        "order": 5
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 59410,
+        "known_for_department": "Acting",
+        "name": "Bob Odenkirk",
+        "original_name": "Bob Odenkirk",
+        "popularity": 7.4375,
+        "profile_path": "/rF0Lb6SBhGSTvjRffmlKRSeI3jE.jpg",
+        "character": "Saul Goodman",
+        "credit_id": "5271b180760ee35afc09bb8d",
+        "order": 7
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 783,
+        "known_for_department": "Acting",
+        "name": "Jonathan Banks",
+        "original_name": "Jonathan Banks",
+        "popularity": 5.1895,
+        "profile_path": "/bswk26L13PvY4iMTwUTAsepXCLv.jpg",
+        "character": "Mike Ehrmantraut",
+        "credit_id": "5271b1e6760ee35af60941ad",
+        "order": 9
+      }
+    ],
+    "crew": [
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 1223202,
+        "known_for_department": "Production",
+        "name": "Diane Mercer",
+        "original_name": "Diane Mercer",
+        "popularity": 0.8764,
+        "profile_path": null,
+        "credit_id": "67ac74429ed73a4324b0952e",
+        "department": "Production",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 17419,
+        "known_for_department": "Acting",
+        "name": "Bryan Cranston",
+        "original_name": "Bryan Cranston",
+        "popularity": 5.4681,
+        "profile_path": "/npIIZJGSrcJIJ6yHdmbqO6Jzo5I.jpg",
+        "credit_id": "5254228d760ee31328001cc7",
+        "department": "Production",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 29779,
+        "known_for_department": "Directing",
+        "name": "Michelle MacLaren",
+        "original_name": "Michelle MacLaren",
+        "popularity": 1.236,
+        "profile_path": "/3LcH5eNiysMWaepARllVrS4Dzn7.jpg",
+        "credit_id": "64189e5f6a2227008de8d147",
+        "department": "Production",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 1223200,
+        "known_for_department": "Production",
+        "name": "Stewart Lyons",
+        "original_name": "Stewart Lyons",
+        "popularity": 0.957,
+        "profile_path": "/dCAN4EMn8rsqALwDIjf9aNjuVTm.jpg",
+        "credit_id": "64189d12310325010151b7b7",
+        "department": "Production",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 1280070,
+        "known_for_department": "Sound",
+        "name": "Dave Porter",
+        "original_name": "Dave Porter",
+        "popularity": 0.832,
+        "profile_path": "/flRW9QknVtU8HG7lLjMvflbhl2a.jpg",
+        "credit_id": "52b7008819c29559eb03dd72",
+        "department": "Sound",
+        "job": "Original Music Composer"
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 5162,
+        "known_for_department": "Production",
+        "name": "Mark Johnson",
+        "original_name": "Mark Johnson",
+        "popularity": 1.2839,
+        "profile_path": "/gLuXkOQjqB81aHMGJ2OtYzEpHQu.jpg",
+        "credit_id": "52542287760ee31328001b69",
+        "department": "Production",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 66633,
+        "known_for_department": "Writing",
+        "name": "Vince Gilligan",
+        "original_name": "Vince Gilligan",
+        "popularity": 2.8676,
+        "profile_path": "/wJIxATESjzsjSgvRhVavOmdamXc.jpg",
+        "credit_id": "52542287760ee31328001af1",
+        "department": "Production",
+        "job": "Executive Producer"
+      }
+    ]
+  },
+  "videos": {
+    "results": []
+  },
+  "images": {
+    "backdrops": [
+      {
+        "aspect_ratio": 1.777,
+        "height": 1688,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+        "vote_average": 6.306,
+        "vote_count": 36,
+        "width": 3000
+      },
+      {
+        "aspect_ratio": 1.778,
+        "height": 1080,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/sp1RSDvoVsbvDouQx1A75ebU35e.jpg",
+        "vote_average": 5.778,
+        "vote_count": 9,
+        "width": 1920
+      },
+      {
+        "aspect_ratio": 1.778,
+        "height": 1080,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/84XPpjGvxNyExjSuLQe0SzioErt.jpg",
+        "vote_average": 5.616,
+        "vote_count": 26,
+        "width": 1920
+      },
+      {
+        "aspect_ratio": 1.778,
+        "height": 2160,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/63FA8vwSZnXkGxedrDQwni4JuZN.jpg",
+        "vote_average": 5.566,
+        "vote_count": 15,
+        "width": 3840
+      },
+      {
+        "aspect_ratio": 1.778,
+        "height": 1080,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/9faGSFi5jam6pDWGNd0p8JcJgXQ.jpg",
+        "vote_average": 5.5,
+        "vote_count": 20,
+        "width": 1920
+      },
+      {
+        "aspect_ratio": 1.778,
+        "height": 1080,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/n3u3kgNttY1F5Ixi5bMY9BwZImQ.jpg",
+        "vote_average": 5.25,
+        "vote_count": 12,
+        "width": 1920
+      }
+    ],
+    "logos": [
+      {
+        "aspect_ratio": 1.68,
+        "height": 1300,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/chw44B2VnLha8iiTdyZcIW0ZELC.png",
+        "vote_average": 7.19,
+        "vote_count": 7,
+        "width": 2184
+      },
+      {
+        "aspect_ratio": 1.68,
+        "height": 219,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/ojzKpMUAcA91P6wF0TfCyAvvYLw.svg",
+        "vote_average": 3.334,
+        "vote_count": 2,
+        "width": 368
+      },
+      {
+        "aspect_ratio": 5.109,
+        "height": 1200,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/h6yDiAXP5AyOzXHTxjUssYOGbG3.png",
+        "vote_average": 2.066,
+        "vote_count": 5,
+        "width": 6131
+      },
+      {
+        "aspect_ratio": 1.68,
+        "height": 219,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/bM2bNffZlZ2UxZqwHaxr5VS3UUI.svg",
+        "vote_average": 1.75,
+        "vote_count": 4,
+        "width": 368
+      },
+      {
+        "aspect_ratio": 1.681,
+        "height": 464,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/72OJ4Uqmdi8DwPqfjQtz7IG43cc.png",
+        "vote_average": 1.75,
+        "vote_count": 4,
+        "width": 780
+      },
+      {
+        "aspect_ratio": 5.109,
+        "height": 1200,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/nhjOtFmSRYjd6wRNj3eXVdB6xQO.png",
+        "vote_average": 1.75,
+        "vote_count": 2,
+        "width": 6131
+      }
+    ],
+    "posters": [
+      {
+        "aspect_ratio": 0.667,
+        "height": 3000,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/anFx9aTOOYqgS3v7x3R84Kz67ly.jpg",
+        "vote_average": 6.648,
+        "vote_count": 17,
+        "width": 2000
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1500,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/ineLOBPG8AZsluYwnkMpHRyu7L.jpg",
+        "vote_average": 6.546,
+        "vote_count": 22,
+        "width": 1000
+      },
+      {
+        "aspect_ratio": 0.675,
+        "height": 1500,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+        "vote_average": 6.272,
+        "vote_count": 79,
+        "width": 1012
+      },
+      {
+        "aspect_ratio": 0.666,
+        "height": 2000,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/vZ1RQSDZ3xzBhLqJdrmvpkm2Nbu.jpg",
+        "vote_average": 6.0,
+        "vote_count": 19,
+        "width": 1332
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1500,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/3xnWaLQjelJDDF7LT1WBo6f4BRe.jpg",
+        "vote_average": 5.97,
+        "vote_count": 33,
+        "width": 1000
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1500,
+        "iso_3166_1": "US",
+        "iso_639_1": "en",
+        "file_path": "/zKnBah5dWlFoY0yIKcSIYb4f7kC.jpg",
+        "vote_average": 5.488,
+        "vote_count": 40,
+        "width": 1000
+      }
+    ]
+  }
 }

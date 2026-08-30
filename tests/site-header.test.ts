@@ -6,7 +6,7 @@ const header = () => readFileSync('components/site-header.tsx', 'utf8')
 describe('site header', () => {
   it('reads the session on the server', () => {
     expect(header()).toContain("from '@/server/auth/config'")
-    expect(header()).toMatch(/await auth\(\)/)
+    expect(header()).toMatch(/await\b[^\n]*\bauth\(\)/)
   })
 
   it('is not a client component', () => {
@@ -35,5 +35,16 @@ describe('site header', () => {
     // Asserted file-wide: three of the five inherit text-sm from an ancestor, so a
     // filter keyed on that class would not see them regress.
     expect(header()).not.toContain('text-[var(--muted)]')
+  })
+
+  it('fetches the merged genre list on the server and hands it to the menu', () => {
+    const code = header()
+    expect(code).toContain("from '@/server/tmdb/endpoints/genres'")
+    expect(code).toMatch(/await\b[^\n]*\bgetMergedGenres\(\)/)
+    expect(code).toMatch(/<GenresMenu genres=\{genres\} \/>/)
+  })
+
+  it('guards the genre fetch so a TMDB outage does not take down every route', () => {
+    expect(header()).toMatch(/getMergedGenres\(\)\.catch\(/)
   })
 })
