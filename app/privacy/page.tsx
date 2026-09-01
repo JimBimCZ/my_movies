@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-16">
         <h1 className="text-2xl font-bold tracking-tight">Privacy Policy</h1>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Provisional &mdash; last updated 29 August 2026. This document will be revised as the
+          Provisional &mdash; last updated 1 September 2026. This document will be revised as the
           application is completed.
         </p>
 
@@ -83,8 +83,9 @@ export default function PrivacyPage() {
 
         <Section title="Cookies">
           <p>
-            One essential cookie, holding the session identifier that keeps you signed in. There
-            are no analytics, advertising, or third-party tracking cookies.
+            A small set of essential cookies: one holds the session identifier that keeps you
+            signed in, and the others are short-lived cookies that protect the sign-in flow
+            itself. There are no analytics, advertising, or third-party tracking cookies.
           </p>
         </Section>
 
@@ -107,7 +108,16 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="Contact">
-          <p className="italic">A contact address has not been added to this page yet.</p>
+          <p>
+            For questions about this policy, or to have your account and its data deleted, email{' '}
+            <a
+              href="mailto:busek.vit@gmail.com"
+              className="text-[var(--foreground)] underline underline-offset-4"
+            >
+              busek.vit@gmail.com
+            </a>
+            .
+          </p>
         </Section>
       </div>
     </main>
